@@ -2,6 +2,8 @@
 mod quiz_tests;
 #[cfg(test)]
 mod ban_tests;
+#[cfg(test)]
+mod whitelist_tests;
 mod auth;
 // src/lib.rs
 // Entry point for the WASM Stealth Bot Trap Spin app
