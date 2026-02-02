@@ -113,6 +113,23 @@ function updateStatCards(analytics, events, bans) {
   document.getElementById('active-bans').textContent = bans.length || 0;
   document.getElementById('total-events').textContent = (events.recent_events || []).length;
   document.getElementById('unique-ips').textContent = (events.top_ips || []).length;
+  
+  // Update test mode banner and toggle
+  const testMode = analytics.test_mode === true;
+  const banner = document.getElementById('test-mode-banner');
+  const toggle = document.getElementById('test-mode-toggle');
+  const status = document.getElementById('test-mode-status');
+  
+  if (testMode) {
+    banner.classList.remove('hidden');
+    status.textContent = 'Enabled (logging only)';
+    status.style.color = '#d97706';
+  } else {
+    banner.classList.add('hidden');
+    status.textContent = 'Disabled (blocking active)';
+    status.style.color = '#10b981';
+  }
+  toggle.checked = testMode;
 }
 
 // Update event types chart
@@ -416,6 +433,44 @@ document.getElementById('unban-btn').onclick = async function() {
 // Initialize charts and load data on page load
 initCharts();
 document.getElementById('refresh').click();
+
+// Test Mode Toggle Handler
+document.getElementById('test-mode-toggle').addEventListener('change', async function() {
+  const endpoint = document.getElementById('endpoint').value.replace(/\/$/, '');
+  const apikey = document.getElementById('apikey').value;
+  const msg = document.getElementById('admin-msg');
+  const testMode = this.checked;
+  
+  msg.textContent = `${testMode ? 'Enabling' : 'Disabling'} test mode...`;
+  msg.className = 'message info';
+  
+  try {
+    const resp = await fetch(`${endpoint}/admin/config`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apikey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ test_mode: testMode })
+    });
+    
+    if (!resp.ok) {
+      throw new Error('Failed to update config');
+    }
+    
+    const data = await resp.json();
+    msg.textContent = `✓ Test mode ${data.config.test_mode ? 'enabled' : 'disabled'}`;
+    msg.className = 'message success';
+    
+    // Refresh dashboard to update banner
+    setTimeout(() => document.getElementById('refresh').click(), 500);
+  } catch (e) {
+    msg.textContent = '✗ Error: ' + e.message;
+    msg.className = 'message error';
+    // Revert toggle on error
+    this.checked = !testMode;
+  }
+});
 
 // Auto-refresh every 30 seconds
 setInterval(() => {

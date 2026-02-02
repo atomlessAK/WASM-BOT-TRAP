@@ -115,30 +115,78 @@ pub fn handle_bot_trap_impl(req: &Request) -> Response {
     if whitelist::is_whitelisted(&ip, &cfg.whitelist) {
         return Response::new(200, "OK (whitelisted)");
     }
-    // Test mode: log and allow all actions
+    // Test mode: log and allow all actions (no blocking, banning, or challenging)
     if cfg.test_mode {
         if honeypot::is_honeypot(path, &cfg.honeypots) {
             println!("[TEST MODE] Would ban IP {ip} for honeypot");
+            crate::admin::log_event(store, &crate::admin::EventLogEntry {
+                ts: crate::admin::now_ts(),
+                event: crate::admin::EventType::Block,
+                ip: Some(ip.clone()),
+                reason: Some("honeypot [TEST MODE]".to_string()),
+                outcome: Some("would_block".to_string()),
+                admin: None,
+            });
             return Response::new(200, "TEST MODE: Would block (honeypot)");
         }
         if !rate::check_rate_limit(store, site_id, &ip, cfg.rate_limit) {
             println!("[TEST MODE] Would ban IP {ip} for rate limit");
+            crate::admin::log_event(store, &crate::admin::EventLogEntry {
+                ts: crate::admin::now_ts(),
+                event: crate::admin::EventType::Block,
+                ip: Some(ip.clone()),
+                reason: Some("rate_limit [TEST MODE]".to_string()),
+                outcome: Some("would_block".to_string()),
+                admin: None,
+            });
             return Response::new(200, "TEST MODE: Would block (rate limit)");
         }
         if ban::is_banned(store, site_id, &ip) {
             println!("[TEST MODE] Would serve quiz to banned IP {ip}");
+            crate::admin::log_event(store, &crate::admin::EventLogEntry {
+                ts: crate::admin::now_ts(),
+                event: crate::admin::EventType::Block,
+                ip: Some(ip.clone()),
+                reason: Some("banned [TEST MODE]".to_string()),
+                outcome: Some("would_serve_quiz".to_string()),
+                admin: None,
+            });
             return Response::new(200, "TEST MODE: Would serve quiz");
         }
         if path != "/health" && js::needs_js_verification(req, store, site_id, &ip) {
             println!("[TEST MODE] Would inject JS challenge for IP {ip}");
+            crate::admin::log_event(store, &crate::admin::EventLogEntry {
+                ts: crate::admin::now_ts(),
+                event: crate::admin::EventType::Challenge,
+                ip: Some(ip.clone()),
+                reason: Some("js_verification [TEST MODE]".to_string()),
+                outcome: Some("would_challenge".to_string()),
+                admin: None,
+            });
             return Response::new(200, "TEST MODE: Would inject JS challenge");
         }
         if browser::is_outdated_browser(ua, &cfg.browser_block) {
             println!("[TEST MODE] Would ban IP {ip} for outdated browser");
+            crate::admin::log_event(store, &crate::admin::EventLogEntry {
+                ts: crate::admin::now_ts(),
+                event: crate::admin::EventType::Block,
+                ip: Some(ip.clone()),
+                reason: Some("browser [TEST MODE]".to_string()),
+                outcome: Some("would_block".to_string()),
+                admin: None,
+            });
             return Response::new(200, "TEST MODE: Would block (outdated browser)");
         }
         if geo::is_high_risk_geo(req, &cfg.geo_risk) {
             println!("[TEST MODE] Would inject JS challenge for geo-risk IP {ip}");
+            crate::admin::log_event(store, &crate::admin::EventLogEntry {
+                ts: crate::admin::now_ts(),
+                event: crate::admin::EventType::Challenge,
+                ip: Some(ip.clone()),
+                reason: Some("geo_risk [TEST MODE]".to_string()),
+                outcome: Some("would_challenge".to_string()),
+                admin: None,
+            });
             return Response::new(200, "TEST MODE: Would inject JS challenge (geo-risk)");
         }
         return Response::new(200, "TEST MODE: Would allow (passed bot trap)");

@@ -9,12 +9,15 @@
 #   1. Start Spin server: spin up
 #   2. Run this script: ./test_spin_colored.sh
 #
-# This script runs 5 integration test scenarios:
+# This script runs 8 integration test scenarios:
 #   1. Health check endpoint (GET /health)
 #   2. Root endpoint behavior (GET /)
 #   3. Honeypot ban detection (POST /bot-trap)
 #   4. Admin API unban (POST /admin/unban)
 #   5. Health check after ban/unban (GET /health)
+#   6. Config API - get config (GET /admin/config)
+#   7. Test mode toggle (POST /admin/config)
+#   8. Test mode behavior verification
 
 set -e
 
@@ -81,5 +84,77 @@ if curl -sf -H "X-Forwarded-For: 127.0.0.1" "$BASE_URL/health" | grep -q OK; the
 else
   fail "/health did not return OK after ban/unban"
 fi
+
+# Test 6: Get config via admin API
+info "Testing GET /admin/config..."
+config_resp=$(curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/config")
+if echo "$config_resp" | grep -q '"test_mode"'; then
+  pass "GET /admin/config returns test_mode field"
+else
+  fail "GET /admin/config did not return test_mode"
+  echo -e "${YELLOW}DEBUG config response:${NC} $config_resp"
+fi
+
+# Test 7: Enable test mode
+info "Testing POST /admin/config to enable test_mode..."
+enable_resp=$(curl -s -X POST -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" \
+  -d '{"test_mode": true}' "$BASE_URL/admin/config")
+if echo "$enable_resp" | grep -q '"test_mode":true'; then
+  pass "POST /admin/config enables test_mode"
+else
+  fail "POST /admin/config did not enable test_mode"
+  echo -e "${YELLOW}DEBUG enable response:${NC} $enable_resp"
+fi
+
+# Test 8: Test mode allows honeypot access without blocking
+info "Testing test_mode behavior (honeypot should not block)..."
+# First, unban the test IP to ensure clean state
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.99" > /dev/null
+# Hit honeypot with test IP
+honeypot_resp=$(curl -s -H "X-Forwarded-For: 10.0.0.99" "$BASE_URL/bot-trap")
+if echo "$honeypot_resp" | grep -q 'TEST MODE'; then
+  pass "Test mode returns TEST MODE response for honeypot"
+else
+  fail "Test mode did not return expected TEST MODE response"
+  echo -e "${YELLOW}DEBUG honeypot response:${NC} $honeypot_resp"
+fi
+
+# Verify IP was NOT actually banned
+subsequent_resp=$(curl -s -H "X-Forwarded-For: 10.0.0.99" "$BASE_URL/")
+if echo "$subsequent_resp" | grep -q 'TEST MODE'; then
+  pass "Test mode: IP not actually banned after honeypot"
+else
+  fail "Test mode: IP was banned when it should not have been"
+  echo -e "${YELLOW}DEBUG subsequent response:${NC} $subsequent_resp"
+fi
+
+# Test 9: Disable test mode and verify blocking resumes
+info "Testing POST /admin/config to disable test_mode..."
+disable_resp=$(curl -s -X POST -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" \
+  -d '{"test_mode": false}' "$BASE_URL/admin/config")
+if echo "$disable_resp" | grep -q '"test_mode":false'; then
+  pass "POST /admin/config disables test_mode"
+else
+  fail "POST /admin/config did not disable test_mode"
+  echo -e "${YELLOW}DEBUG disable response:${NC} $disable_resp"
+fi
+
+# Test 10: Verify blocking works again after test mode disabled
+info "Testing that blocking resumes after test_mode disabled..."
+# Unban first to get clean state
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.100" > /dev/null
+# Hit honeypot - should now actually ban
+curl -s -H "X-Forwarded-For: 10.0.0.100" "$BASE_URL/bot-trap" > /dev/null
+block_resp=$(curl -s -H "X-Forwarded-For: 10.0.0.100" "$BASE_URL/")
+if echo "$block_resp" | grep -q 'Access Blocked'; then
+  pass "Blocking resumes: honeypot triggers real ban after test_mode disabled"
+else
+  fail "Blocking did not resume after test_mode disabled"
+  echo -e "${YELLOW}DEBUG block response:${NC} $block_resp"
+fi
+
+# Cleanup: unban test IPs
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.99" > /dev/null
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.100" > /dev/null
 
 echo -e "\n${GREEN}All integration tests complete.${NC}"

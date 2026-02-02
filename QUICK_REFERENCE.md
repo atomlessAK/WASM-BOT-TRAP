@@ -56,6 +56,23 @@ environment = { API_KEY = "your-secret-key-here" }
 
 ### Test Mode
 Enable for safe production testing (logs but doesn't block):
+
+**Via Dashboard:** Use the Test Mode toggle in Admin Controls
+
+**Via API:**
+```bash
+# Enable test mode
+curl -X POST -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"test_mode": true}' \
+  http://127.0.0.1:3000/admin/config
+
+# Check current status
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  http://127.0.0.1:3000/admin/config
+```
+
+**Via environment (requires restart):**
 ```toml
 environment = { TEST_MODE = "1" }
 ```

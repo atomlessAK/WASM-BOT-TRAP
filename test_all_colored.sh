@@ -9,7 +9,7 @@
 #    - NO Spin required
 #    - Test individual functions in isolation
 #
-# 2. INTEGRATION TESTS (5 scenarios)
+# 2. INTEGRATION TESTS (10 scenarios)
 #    - Run in SPIN ENVIRONMENT ONLY (shell scripts via curl)
 #    - Requires HTTP server, key-value store, real headers
 #    - Tests full HTTP API end-to-end
@@ -44,7 +44,7 @@ echo ""
 echo -e "${YELLOW}============================================${NC}"
 echo -e "${YELLOW}  INTEGRATION TESTS (Spin Environment)${NC}"
 echo -e "${YELLOW}  Run via: test_spin_colored.sh${NC}"
-echo -e "${YELLOW}  Count: 5 scenarios${NC}"
+echo -e "${YELLOW}  Count: 10 scenarios${NC}"
 echo -e "${YELLOW}============================================${NC}"
 echo ""
 
@@ -52,12 +52,12 @@ info "Building Spin app..."
 spin build
 
 info "Running integration tests (test_spin_colored.sh)..."
-./test_spin_colored.sh && pass "All 5 integration test scenarios passed" || { fail "Integration tests failed"; exit 1; }
+./test_spin_colored.sh && pass "All 10 integration test scenarios passed" || { fail "Integration tests failed"; exit 1; }
 
 echo ""
 echo -e "${GREEN}============================================${NC}"
 echo -e "${GREEN}  ALL TESTS COMPLETE${NC}"
 echo -e "${GREEN}  Unit tests: 13/13 passed${NC}"
-echo -e "${GREEN}  Integration tests: 5/5 scenarios passed${NC}"
+echo -e "${GREEN}  Integration tests: 10/10 scenarios passed${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""

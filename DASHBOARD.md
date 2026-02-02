@@ -11,6 +11,7 @@ The bot trap now includes a real-time monitoring dashboard with visualizations a
 - **Active Bans**: Currently banned IPs (non-expired)
 - **Total Events**: All logged security events
 - **Unique IPs**: Distinct IP addresses tracked
+- **Test Mode Banner**: Prominent warning when test mode is active
 
 ### 📈 Visualizations
 1. **Event Types Distribution** (Doughnut Chart)
@@ -43,6 +44,12 @@ The bot trap now includes a real-time monitoring dashboard with visualizations a
 - Optional reason/details
 
 ### 🛠️ Admin Controls
+
+#### Test Mode Toggle
+- Enable/disable test mode with a single click
+- When enabled: all blocking is logged but not enforced
+- Visual indicator shows current status
+- Persists across page refreshes
 
 #### Manual Ban
 - Input IP address to ban
@@ -86,8 +93,10 @@ dashboard/
 
 ### API Endpoints Used
 ```
-GET  /admin/analytics  # Stats (total bans, active bans, events, unique IPs)
+GET  /admin/analytics  # Stats (total bans, active bans, events, unique IPs, test_mode status)
 GET  /admin/events     # Recent events log
+GET  /admin/config     # Current configuration including test_mode
+POST /admin/config     # Update configuration (e.g., toggle test_mode)
 POST /admin/ban        # Manual IP ban
 POST /admin/unban      # Manual IP unban
 ```

@@ -1,37 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bot Trap Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h1>Bot Trap Dashboard</h1>
-    <div class="config">
-      <label>API Endpoint: <input id="endpoint" value="http://127.0.0.1:3000" size="30"></label>
-      <label>API Key: <input id="apikey" value="changeme-supersecret" size="30" type="password"></label>
-      <button id="refresh">Refresh</button>
-    </div>
-    <div class="stats">
-      <h2>Ban Analytics</h2>
-      <pre id="analytics">Loading...</pre>
-    </div>
-    <div class="events">
-      <h2>Recent Events</h2>
-      <table id="events">
-        <thead>
-          <tr><th>Time</th><th>Type</th><th>IP</th><th>Reason</th><th>Outcome</th><th>Admin</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div class="top-ips">
-      <h2>Top IPs</h2>
-      <ul id="top-ips"></ul>
-    </div>
-  </div>
-  <script src="dashboard.js"></script>
-</body>
-</html>
+# Bot Trap Dashboard
+
+Real-time dashboard for monitoring and managing the WASM Bot Trap.
+
+## Features
+
+- **Live Analytics**: Charts for blocked requests, ban rates, and traffic patterns
+- **Event Log**: Real-time stream of bot detection events
+- **Ban Management**: Manual IP ban/unban controls
+- **Test Mode Toggle**: Enable/disable test mode from the dashboard
+- **Top IPs**: View most frequently flagged IP addresses
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `index.html` | Main dashboard page with UI layout |
+| `dashboard.js` | Chart rendering and data updates |
+| `admin.js` | API helper functions for admin operations |
+| `style.css` | Dashboard styling and responsive layout |
+
+## Admin API Functions (admin.js)
+
+### Ban Management
+- `banIp(ip, reason, duration)` - Manually ban an IP address
+- `unbanIp(ip)` - Remove an IP from the ban list
+
+### Configuration
+- `getConfig()` - Get current server configuration
+- `updateConfig(updates)` - Update server configuration
+- `setTestMode(enabled)` - Enable or disable test mode
+
+## Test Mode
+
+When test mode is enabled:
+- All bot trap logic runs normally
+- Events are logged with `[TEST MODE]` suffix
+- **No requests are actually blocked**
+- Dashboard shows amber "TEST MODE ACTIVE" banner
+
+Toggle test mode via:
+1. Dashboard toggle switch in Admin Controls
+2. API: `POST /admin/config` with `{"test_mode": true}`
+3. Environment variable: `TEST_MODE=true`
+
+## Usage
+
+1. Start the Spin server: `spin up`
+2. Open browser to: `http://127.0.0.1:3000/dashboard/`
+3. Configure API endpoint and key
+4. Click "Refresh" to load data
+
+## Development
+
+The dashboard runs entirely client-side. To modify:
+
+1. Edit HTML/JS/CSS files directly
+2. Refresh browser to see changes
+3. No build step required

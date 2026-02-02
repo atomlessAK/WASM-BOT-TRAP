@@ -54,7 +54,7 @@ use serde_json::json;
 
 /// Returns true if the path is a valid admin endpoint (prevents path traversal/abuse).
 fn sanitize_path(path: &str) -> bool {
-    matches!(path, "/admin" | "/admin/ban" | "/admin/unban" | "/admin/analytics" | "/admin/events")
+    matches!(path, "/admin" | "/admin/ban" | "/admin/unban" | "/admin/analytics" | "/admin/events" | "/admin/config")
 }
 
 /// Handles all /admin API endpoints. Requires valid API key in Authorization header.
@@ -62,8 +62,10 @@ fn sanitize_path(path: &str) -> bool {
 ///   - GET /admin/ban: List all bans for the site
 ///   - POST /admin/ban: Manually ban an IP (expects JSON body: {"ip": "1.2.3.4", "reason": "...", "duration": 3600})
 ///   - POST /admin/unban?ip=...: Remove a ban for an IP
-///   - GET /admin/analytics: Return ban count
+///   - GET /admin/analytics: Return ban count and test_mode status
 ///   - GET /admin/events: Query event log
+///   - GET /admin/config: Get current config including test_mode status
+///   - POST /admin/config: Update config (e.g., toggle test_mode)
 ///   - GET /admin: API help
 pub fn handle_admin(req: &Request) -> Response {
     // Require valid API key
@@ -201,7 +203,8 @@ pub fn handle_admin(req: &Request) -> Response {
             Response::new(200, "Unbanned")
         }
         "/admin/analytics" => {
-            // Return simple analytics: ban count
+            // Return analytics: ban count and test_mode status
+            let cfg = crate::config::Config::load(&store, site_id);
             let mut ban_count = 0;
             if let Ok(keys) = store.get_keys() {
                 for k in keys {
@@ -219,7 +222,95 @@ pub fn handle_admin(req: &Request) -> Response {
                 outcome: Some(format!("ban_count={}", ban_count)),
                 admin: Some(crate::auth::get_admin_id(req)),
             });
-            let body = serde_json::to_string(&json!({"ban_count": ban_count})).unwrap();
+            let body = serde_json::to_string(&json!({
+                "ban_count": ban_count,
+                "test_mode": cfg.test_mode
+            })).unwrap();
+            Response::new(200, body)
+        }
+        "/admin/config" => {
+            // GET: Return current config
+            // POST: Update config (supports {"test_mode": true/false})
+            if *req.method() == spin_sdk::http::Method::Post {
+                let body_str = String::from_utf8_lossy(req.body());
+                let parsed: Result<serde_json::Value, _> = serde_json::from_str(&body_str);
+                if let Ok(json) = parsed {
+                    // Load current config
+                    let mut cfg = crate::config::Config::load(&store, site_id);
+                    let mut changed = false;
+                    
+                    // Update test_mode if provided
+                    if let Some(test_mode) = json.get("test_mode").and_then(|v| v.as_bool()) {
+                        let old_value = cfg.test_mode;
+                        cfg.test_mode = test_mode;
+                        if old_value != test_mode {
+                            changed = true;
+                            // Log test_mode toggle event
+                            log_event(&store, &EventLogEntry {
+                                ts: now_ts(),
+                                event: EventType::AdminAction,
+                                ip: None,
+                                reason: Some("test_mode_toggle".to_string()),
+                                outcome: Some(format!("{} -> {}", old_value, test_mode)),
+                                admin: Some(crate::auth::get_admin_id(req)),
+                            });
+                        }
+                    }
+                    
+                    // Update other config fields if provided
+                    if let Some(ban_duration) = json.get("ban_duration").and_then(|v| v.as_u64()) {
+                        cfg.ban_duration = ban_duration;
+                        changed = true;
+                    }
+                    if let Some(rate_limit) = json.get("rate_limit").and_then(|v| v.as_u64()) {
+                        cfg.rate_limit = rate_limit as u32;
+                        changed = true;
+                    }
+                    
+                    // Save config to KV store
+                    if changed {
+                        let key = format!("config:{}", site_id);
+                        if let Ok(val) = serde_json::to_vec(&cfg) {
+                            let _ = store.set(&key, &val);
+                        }
+                    }
+                    
+                    let body = serde_json::to_string(&json!({
+                        "status": "updated",
+                        "config": {
+                            "test_mode": cfg.test_mode,
+                            "ban_duration": cfg.ban_duration,
+                            "rate_limit": cfg.rate_limit,
+                            "honeypots": cfg.honeypots,
+                            "geo_risk": cfg.geo_risk
+                        }
+                    })).unwrap();
+                    return Response::new(200, body);
+                } else {
+                    return Response::new(400, "Invalid JSON in request body");
+                }
+            }
+            // GET: Return current config
+            let cfg = crate::config::Config::load(&store, site_id);
+            log_event(&store, &EventLogEntry {
+                ts: now_ts(),
+                event: EventType::AdminAction,
+                ip: None,
+                reason: Some("config_view".to_string()),
+                outcome: Some(format!("test_mode={}", cfg.test_mode)),
+                admin: Some(crate::auth::get_admin_id(req)),
+            });
+            let body = serde_json::to_string(&json!({
+                "test_mode": cfg.test_mode,
+                "ban_duration": cfg.ban_duration,
+                "rate_limit": cfg.rate_limit,
+                "honeypots": cfg.honeypots,
+                "browser_block": cfg.browser_block,
+                "browser_whitelist": cfg.browser_whitelist,
+                "geo_risk": cfg.geo_risk,
+                "whitelist": cfg.whitelist,
+                "path_whitelist": cfg.path_whitelist
+            })).unwrap();
             Response::new(200, body)
         }
         "/admin" => {
@@ -232,7 +323,7 @@ pub fn handle_admin(req: &Request) -> Response {
                 outcome: None,
                 admin: Some(crate::auth::get_admin_id(req)),
             });
-            Response::new(200, "WASM Bot Trap Admin API. Use /admin/ban, /admin/unban?ip=IP, /admin/analytics.")
+            Response::new(200, "WASM Bot Trap Admin API. Endpoints: /admin/ban, /admin/unban?ip=IP, /admin/analytics, /admin/events, /admin/config (GET/POST for test_mode toggle).")
         }
         _ => Response::new(404, "Not found"),
     }

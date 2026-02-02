@@ -14,6 +14,9 @@
     <header>
       <h1>🛡️ Bot Trap Dashboard</h1>
       <p class="subtitle">Real-time bot detection and ban management</p>
+      <div id="test-mode-banner" class="test-mode-banner hidden">
+        ⚠️ TEST MODE ACTIVE - Logging only, no blocking
+      </div>
     </header>
 
     <div class="config">
@@ -92,6 +95,15 @@
     <div class="section admin-controls">
       <h2>⚙️ Admin Controls</h2>
       <div class="controls-grid">
+        <div class="control-group">
+          <h3>Test Mode</h3>
+          <p class="control-desc">When enabled, logs actions without blocking users</p>
+          <label class="toggle-switch">
+            <input type="checkbox" id="test-mode-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span id="test-mode-status">Loading...</span>
+        </div>
         <div class="control-group">
           <h3>Ban IP</h3>
           <input id="ban-ip" type="text" placeholder="IP address" />

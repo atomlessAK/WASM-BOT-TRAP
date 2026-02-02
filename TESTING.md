@@ -25,7 +25,7 @@ open http://127.0.0.1:3000/dashboard/index.html
 | Test Type | Count | Environment | Command | Requirements |
 |-----------|-------|-------------|---------|--------------|
 | **Unit Tests** | 13 | Native Rust | `cargo test` | None (just Rust) |
-| **Integration Tests** | 5 | Spin Environment | `./test_spin_colored.sh` | Spin server running |
+| **Integration Tests** | 10 | Spin Environment | `./test_spin_colored.sh` | Spin server running |
 | **Dashboard Tests** | Manual | Browser | Open dashboard URL | Spin server running |
 
 ---
@@ -97,7 +97,7 @@ spin up
 make local    # Starts Spin in background, then runs tests
 ```
 
-### What They Test (5 Scenarios)
+### What They Test (10 Scenarios)
 
 1. **Health Check Endpoint**
    - `GET /health`
@@ -111,13 +111,33 @@ make local    # Starts Spin in background, then runs tests
    - `POST /bot-trap`
    - Verifies honeypot triggers ban correctly
 
-4. **Admin API Manual Ban**
-   - `POST /admin/ban`
-   - Tests admin ban functionality with authentication
-
-5. **Admin API Unban**
+4. **Admin API Unban**
    - `POST /admin/unban`
-   - Verifies unban functionality and access restoration
+   - Verifies unban functionality
+
+5. **Health Check After Ban/Unban**
+   - `GET /health`
+   - Verifies system stable after ban/unban cycle
+
+6. **Config API - Get Config**
+   - `GET /admin/config`
+   - Returns current configuration including test_mode
+
+7. **Test Mode Enable**
+   - `POST /admin/config` with `{"test_mode": true}`
+   - Enables test mode via API
+
+8. **Test Mode Behavior - Honeypot**
+   - `GET /bot-trap` with test_mode enabled
+   - Verifies honeypot returns TEST MODE response (no actual ban)
+
+9. **Test Mode Disable**
+   - `POST /admin/config` with `{"test_mode": false}`
+   - Disables test mode via API
+
+10. **Blocking Resumes After Test Mode**
+    - `GET /bot-trap` after test_mode disabled
+    - Verifies real blocking resumes
 
 ### Why Spin Environment?
 Integration tests **cannot** run in native Rust because:
@@ -139,7 +159,7 @@ Integration tests **cannot** run in native Rust because:
 This script:
 1. Runs all 13 unit tests in native Rust
 2. Builds the Spin app
-3. Runs all 5 integration test scenarios in Spin
+3. Runs all 10 integration test scenarios in Spin
 4. Provides clear, colorized output showing which environment each test runs in
 
 ### Output Example
@@ -155,15 +175,15 @@ PASS All 13 unit tests passed
 ============================================
   INTEGRATION TESTS (Spin Environment)
   Run via: test_spin_colored.sh
-  Count: 5 scenarios
+  Count: 10 scenarios
 ============================================
 
-PASS All 5 integration test scenarios passed
+PASS All 10 integration test scenarios passed
 
 ============================================
   ALL TESTS COMPLETE
   Unit tests: 13/13 passed
-  Integration tests: 5/5 scenarios passed
+  Integration tests: 10/10 scenarios passed
 ============================================
 ```
 
@@ -187,7 +207,7 @@ PASS All 5 integration test scenarios passed
 **Problem:** Confusing placeholder Rust test with real integration tests  
 **Solution:** 
 - `tests/bot_trap.rs` = 1 placeholder (not a real test)
-- `test_spin_colored.sh` = 5 real integration test scenarios
+- `test_spin_colored.sh` = 10 real integration test scenarios
 
 ---
 
@@ -296,7 +316,7 @@ npm run test:e2e      # Cypress/Playwright end-to-end tests
 # Unit tests only (13 tests, native Rust)
 cargo test
 
-# Integration tests only (5 scenarios, Spin required)
+# Integration tests only (10 scenarios, Spin required)
 spin up  # In separate terminal
 ./test_spin_colored.sh
 
@@ -317,9 +337,9 @@ cargo clean
 
 **Always remember:**
 - **13 unit tests** = Native Rust (`cargo test`)
-- **5 integration tests** = Spin environment (`test_spin_colored.sh`)
+- **10 integration tests** = Spin environment (`test_spin_colored.sh`)
 - **12+ dashboard checks** = Browser manual testing
-- **Total: 30+ test scenarios**
+- **Total: 35+ test scenarios**
 
 ---
 

@@ -642,20 +642,37 @@ Add a `browser_whitelist` array to your config, e.g.:
 
 Test mode allows you to safely deploy and tune the bot trap in production without impacting real users. When enabled, all block/ban/challenge actions are logged but not enforced—users are always allowed through. This is ideal for initial rollout, tuning, and validation.
 
-**How to enable:**
-- Set the environment variable `TEST_MODE=1` or `TEST_MODE=true` in your deployment (e.g., in `spin.toml`):
-	```toml
-	[component.bot-trap]
-	environment = { TEST_MODE = "1" }
-	```
-- Or set `"test_mode": true` in the config KV object.
+**How to enable (choose one):**
+
+1. **Via Dashboard** (recommended): Use the Test Mode toggle in the Admin Controls section
+2. **Via API**: 
+   ```bash
+   curl -X POST -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"test_mode": true}' \
+     http://127.0.0.1:3000/admin/config
+   ```
+3. **Via environment variable** (requires restart):
+   ```toml
+   [component.bot-trap]
+   environment = { TEST_MODE = "1" }
+   ```
+4. **Via KV store**: Set `"test_mode": true` in the config object
 
 **When enabled:**
-- All actions (ban, block, challenge) are logged with a `[TEST MODE]` prefix
+- All actions (ban, block, challenge) are logged with a `[TEST MODE]` prefix in event log
 - No user is actually blocked, banned, or challenged
+- Dashboard shows prominent warning banner
+- Events appear in the event log with `[TEST MODE]` suffix for easy filtering
 - Useful for safe validation and tuning in production
 
-**Disable test mode** to enforce real blocking/ban logic.
+**Check current status:**
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" http://127.0.0.1:3000/admin/config
+# Returns: {"test_mode": true/false, "ban_duration": ..., ...}
+```
+
+**Disable test mode** via dashboard toggle or API to enforce real blocking/ban logic.
 
 ---
 
