@@ -40,23 +40,31 @@ This bot trap is **primarily built and tested for deployment on Fermyon Cloud**.
 
 ## Quick Start (Local Development)
 
-### Prerequisites
-1. Install [Spin](https://developer.fermyon.com/spin/install)
-2. Install Rust with wasm32-wasip1 target: `rustup target add wasm32-wasip1`
+### One-Command Setup (macOS)
 
-### Build and Run (Makefile)
-The easiest way to build and run locally:
+New to the project? Run this single command to install all dependencies:
+
 ```sh
-make local    # Build, clean, and start local server
-make prod     # Build for production and start server
-make clean    # Clean build artifacts
+git clone https://github.com/atomlessAK/WASM-BOT-TRAP.git
+cd WASM-BOT-TRAP
+make setup    # Installs Rust, Spin, cargo-watch, and WASM target
+make dev      # Build and run with file watching
 ```
 
-### Manual Build and Run
+The setup script automatically installs:
+- Homebrew (if missing)
+- Rust/Cargo via rustup
+- wasm32-wasip1 compilation target
+- Fermyon Spin CLI
+- cargo-watch for auto-rebuild
+
+### Already Have Dependencies?
+
+If you already have Rust and Spin installed:
 ```sh
-cargo build --target wasm32-wasip1 --release
-cp target/wasm32-wasip1/release/wasm_bot_trap.wasm src/bot_trap.wasm
-spin up --listen 127.0.0.1:3000
+make dev      # Build and run with file watching (auto-rebuilds on save)
+make run      # Build once and run (no file watching)
+make help     # Show all available commands
 ```
 
 ### Access Dashboard

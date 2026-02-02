@@ -1,4 +1,4 @@
-.PHONY: dev local run build prod clean test test-unit test-integration test-dashboard deploy logs status stop help
+.PHONY: dev local run build prod clean test test-unit test-integration test-dashboard deploy logs status stop help setup
 
 # Default target
 .DEFAULT_GOAL := help
@@ -8,6 +8,13 @@ GREEN := \033[0;32m
 YELLOW := \033[1;33m
 CYAN := \033[0;36m
 NC := \033[0m
+
+#--------------------------
+# Setup (first-time)
+#--------------------------
+
+setup: ## Install all dependencies (Rust, Spin, cargo-watch)
+	@./setup.sh
 
 #--------------------------
 # Development
@@ -115,6 +122,9 @@ logs: ## View Spin component logs
 
 help: ## Show this help message
 	@echo "$(CYAN)WASM Bot Trap - Available Commands$(NC)"
+	@echo ""
+	@echo "$(GREEN)First-time Setup:$(NC)"
+	@grep -E '^setup:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  make %-15s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(GREEN)Development:$(NC)"
 	@grep -E '^(dev|local|run|build):.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  make %-15s %s\n", $$1, $$2}'
