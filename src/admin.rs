@@ -54,7 +54,7 @@ use serde_json::json;
 
 /// Returns true if the path is a valid admin endpoint (prevents path traversal/abuse).
 fn sanitize_path(path: &str) -> bool {
-    matches!(path, "/admin" | "/admin/ban" | "/admin/unban" | "/admin/analytics" | "/admin/events" | "/admin/config")
+    matches!(path, "/admin" | "/admin/ban" | "/admin/unban" | "/admin/analytics" | "/admin/events" | "/admin/config" | "/admin/maze")
 }
 
 /// Handles all /admin API endpoints. Requires valid API key in Authorization header.
@@ -355,7 +355,76 @@ pub fn handle_admin(req: &Request) -> Response {
                 outcome: None,
                 admin: Some(crate::auth::get_admin_id(req)),
             });
-            Response::new(200, "WASM Bot Trap Admin API. Endpoints: /admin/ban, /admin/unban?ip=IP, /admin/analytics, /admin/events, /admin/config (GET/POST for test_mode toggle).")
+            Response::new(200, "WASM Bot Trap Admin API. Endpoints: /admin/ban, /admin/unban?ip=IP, /admin/analytics, /admin/events, /admin/config, /admin/maze (GET for maze stats).")
+        }
+        "/admin/maze" => {
+            // Return maze honeypot statistics
+            // - Total unique IPs that have visited maze pages
+            // - Per-IP hit counts (top crawlers)
+            // - Total maze hits
+            let mut maze_ips: Vec<(String, u32)> = Vec::new();
+            let mut total_hits: u32 = 0;
+            
+            if let Ok(keys) = store.get_keys() {
+                for k in keys {
+                    if k.starts_with("maze_hits:") {
+                        let ip = k.strip_prefix("maze_hits:").unwrap_or("unknown").to_string();
+                        if let Ok(Some(val)) = store.get(&k) {
+                            if let Ok(hits) = String::from_utf8_lossy(&val).parse::<u32>() {
+                                total_hits += hits;
+                                maze_ips.push((ip, hits));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Sort by hits descending
+            maze_ips.sort_by(|a, b| b.1.cmp(&a.1));
+            
+            // Get the deepest crawler (most maze page visits)
+            let deepest = maze_ips.first().map(|(ip, hits)| json!({"ip": ip, "hits": hits}));
+            
+            // Top 10 crawlers
+            let top_crawlers: Vec<_> = maze_ips.iter()
+                .take(10)
+                .map(|(ip, hits)| json!({"ip": ip, "hits": hits}))
+                .collect();
+            
+            // Count auto-bans from maze (check bans with reason "maze_crawler")
+            let mut maze_bans = 0;
+            if let Ok(keys) = store.get_keys() {
+                for k in keys {
+                    if k.starts_with(&format!("ban:{}:", site_id)) {
+                        if let Ok(Some(val)) = store.get(&k) {
+                            if let Ok(ban) = serde_json::from_slice::<crate::ban::BanEntry>(&val) {
+                                if ban.reason == "maze_crawler" {
+                                    maze_bans += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Log admin maze view
+            log_event(&store, &EventLogEntry {
+                ts: now_ts(),
+                event: EventType::AdminAction,
+                ip: None,
+                reason: Some("maze_stats_view".to_string()),
+                outcome: Some(format!("{} crawlers, {} hits", maze_ips.len(), total_hits)),
+                admin: Some(crate::auth::get_admin_id(req)),
+            });
+            
+            let body = serde_json::to_string(&json!({
+                "total_hits": total_hits,
+                "unique_crawlers": maze_ips.len(),
+                "maze_auto_bans": maze_bans,
+                "deepest_crawler": deepest,
+                "top_crawlers": top_crawlers
+            })).unwrap();
+            Response::new(200, body)
         }
         _ => Response::new(404, "Not found"),
     }

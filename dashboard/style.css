@@ -526,3 +526,113 @@ input:checked + .toggle-slider:before {
 #save-durations-btn:hover {
   background: #4f46e5;
 }
+/* Maze Section */
+.maze-section {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.maze-section h2 {
+  color: white;
+  margin-bottom: 5px;
+}
+
+.maze-section .section-desc {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.maze-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.maze-stat {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.maze-label {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.maze-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.maze-crawlers {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.maze-crawlers h3 {
+  font-size: 1rem;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.crawler-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crawler-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.crawler-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.crawler-ip {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.crawler-hits {
+  background: #ef4444;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.crawler-hits.high {
+  background: #dc2626;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.no-data {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 20px;
+  font-style: italic;
+}

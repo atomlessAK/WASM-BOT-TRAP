@@ -329,6 +329,35 @@ function updateEventsTable(events) {
   }
 }
 
+// Update maze stats section
+function updateMazeStats(data) {
+  document.getElementById('maze-total-hits').textContent = 
+    data.total_hits?.toLocaleString() || '0';
+  document.getElementById('maze-unique-crawlers').textContent = 
+    data.unique_crawlers?.toLocaleString() || '0';
+  document.getElementById('maze-auto-bans').textContent = 
+    data.maze_auto_bans?.toLocaleString() || '0';
+  
+  // Update crawler list
+  const crawlerList = document.getElementById('maze-crawler-list');
+  const crawlers = data.top_crawlers || [];
+  
+  if (crawlers.length === 0) {
+    crawlerList.innerHTML = '<p class="no-data">No crawlers in maze yet</p>';
+    return;
+  }
+  
+  crawlerList.innerHTML = crawlers.map(crawler => {
+    const isHigh = crawler.hits >= 30;
+    return `
+      <div class="crawler-item">
+        <span class="crawler-ip">${crawler.ip}</span>
+        <span class="crawler-hits ${isHigh ? 'high' : ''}">${crawler.hits} pages</span>
+      </div>
+    `;
+  }).join('');
+}
+
 // Main refresh function
 document.getElementById('refresh').onclick = async function() {
   const endpoint = document.getElementById('endpoint').value.replace(/\/$/, '');
@@ -342,7 +371,7 @@ document.getElementById('refresh').onclick = async function() {
 
   try {
     // Fetch all data in parallel
-    const [analyticsResp, eventsResp, bansResp] = await Promise.all([
+    const [analyticsResp, eventsResp, bansResp, mazeResp] = await Promise.all([
       fetch(endpoint + '/admin/analytics', {
         headers: { 'Authorization': 'Bearer ' + apikey }
       }),
@@ -350,6 +379,9 @@ document.getElementById('refresh').onclick = async function() {
         headers: { 'Authorization': 'Bearer ' + apikey }
       }),
       fetch(endpoint + '/admin/ban', {
+        headers: { 'Authorization': 'Bearer ' + apikey }
+      }),
+      fetch(endpoint + '/admin/maze', {
         headers: { 'Authorization': 'Bearer ' + apikey }
       })
     ]);
@@ -361,6 +393,7 @@ document.getElementById('refresh').onclick = async function() {
     const analytics = await analyticsResp.json();
     const events = await eventsResp.json();
     const bansData = await bansResp.json();
+    const mazeData = mazeResp.ok ? await mazeResp.json() : null;
 
     // Update all sections
     updateStatCards(analytics, events, bansData.bans || []);
@@ -369,6 +402,11 @@ document.getElementById('refresh').onclick = async function() {
     updateTimeSeriesChart();
     updateBansTable(bansData.bans || []);
     updateEventsTable(events.recent_events || []);
+    
+    // Update maze stats
+    if (mazeData) {
+      updateMazeStats(mazeData);
+    }
     
     // Fetch and update ban durations from config
     try {
