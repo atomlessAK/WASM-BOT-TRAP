@@ -102,6 +102,7 @@ Once running, you can access:
 | Endpoint | Description |
 |----------|-------------|
 | http://127.0.0.1:3000/dashboard/index.html | 📊 Monitoring Dashboard |
+| http://127.0.0.1:3000/robots.txt | 🤖 AI Crawler Policy (robots.txt) |
 | http://127.0.0.1:3000/metrics | 📈 Prometheus Metrics |
 | http://127.0.0.1:3000/health | ❤️ Health Check |
 | http://127.0.0.1:3000/admin | 🔧 Admin API Help |
@@ -113,6 +114,7 @@ The dashboard provides:
 - 📈 Visualizations (event types distribution, top IPs)
 - 📋 Ban list with quick unban controls
 - 🛠️ Admin controls (manual ban/unban)
+- 📜 AI Training Opt-Out Policy controls (robots.txt configuration)
 - 🔄 Auto-refresh every 30 seconds
 
 See [DASHBOARD.md](DASHBOARD.md) for complete dashboard documentation.
@@ -159,7 +161,7 @@ WASM Bot Trap offers distinct advantages over other bot protection solutions in 
 | **Akamai Bot Manager Integration** | Designed to complement enterprise-grade ML detection with lightweight, surgical precision |
 | **Platform Agnostic** | Works with any backend (Node.js, Python, Go, etc.)—not locked to WordPress or any CMS |
 | **Rust Performance** | Memory-safe, blazing fast (~2MB WASM binary), no garbage collection pauses |
-| **Multi-Layer Defense** | Rate limiting + honeypot traps + link maze + geo quiz + browser fingerprinting in one package |
+| **Multi-Layer Defense** | Rate limiting + honeypot traps + link maze + AI opt-out policy + geo quiz + browser fingerprinting in one package |
 | **Lightweight Footprint** | ~2MB compiled WASM vs. heavyweight container deployments |
 | **Full Auditability** | 100% open source—review, modify, and audit every line of detection code |
 | **Rapid Deployment** | New detection rules deployed in minutes, not days waiting for vendor updates |
@@ -507,6 +509,8 @@ The `/health` endpoint is accessible to IPs detected as "unknown" to support loc
 	Main entry: triggers bot trap logic. You may see the block page, math quiz, or JS challenge depending on your status.
 - `http://127.0.0.1:3000/bot-trap`  
 	Honeypot: triggers a ban and then shows the block page.
+- `http://127.0.0.1:3000/robots.txt`  
+	Configurable robots.txt with AI crawler opt-out policies.
 - `http://127.0.0.1:3000/trap/*` or `http://127.0.0.1:3000/maze/*`  
 	Link Maze: Infinite trap pages that waste crawler resources (see Link Maze section below).
 - `http://127.0.0.1:3000/quiz`  
@@ -786,6 +790,69 @@ Maze pages include special headers to prevent search engine indexing:
 | Metric | Type | Description |
 |--------|------|-------------|
 | `bot_trap_maze_hits_total` | Counter | Total hits on link maze honeypot pages |
+
+---
+
+### AI Training Opt-Out Policy (robots.txt)
+
+The bot trap provides a configurable `/robots.txt` endpoint that declares crawling policies for AI and search engine bots. Unlike active blocking (which Bot Manager handles), robots.txt is an **advisory policy declaration** that well-behaved crawlers honor.
+
+> **Important**: robots.txt does not enforce blocking—it relies on crawler compliance. For actual enforcement, use Akamai Bot Manager. This feature provides legal/compliance documentation of your intent to opt out of AI training.
+
+#### Key Features
+
+- **AI Training Opt-Out**: Block known AI training crawlers (GPTBot, CCBot, ClaudeBot, Anthropic-AI, etc.)
+- **AI Search Control**: Optionally block AI search assistants (PerplexityBot, etc.)
+- **Search Engine Policy**: Configure access for legitimate search engines (Google, Bing, etc.)
+- **Content-Signal Header**: Implements Cloudflare's proposed standard for machine-readable AI opt-out
+- **Honeypot Integration**: Seeds robots.txt with maze/honeypot paths to trap non-compliant bots
+- **Dashboard Controls**: Toggle policies from the admin dashboard
+
+#### Supported Bot Categories
+
+**AI Training Bots** (blocked by default):
+- GPTBot, ChatGPT-User, CCBot, Google-Extended, Applebot-Extended
+- ClaudeBot, Claude-Web, anthropic-ai, Bytespider
+- FacebookBot, Meta-ExternalAgent, Diffbot, cohere-ai, and more
+
+**AI Search Bots** (configurable):
+- PerplexityBot, YouBot, OAI-SearchBot, DuckAssistBot, Amazonbot
+
+**Search Engines** (allowed by default):
+- Googlebot, Bingbot, DuckDuckBot, YandexBot, Baiduspider
+
+#### Dashboard Controls
+
+In the Admin Controls section, the "AI Training Opt-Out Policy" panel provides:
+
+| Toggle | Default | Effect |
+|--------|---------|--------|
+| Serve robots.txt | ON | Enable/disable the /robots.txt endpoint |
+| Opt-out AI Training | ON | Disallow AI training crawlers |
+| Opt-out AI Search | OFF | Disallow AI search assistants |
+| Restrict Search Engines | OFF | Disallow legitimate search engines |
+| Crawl Delay | 2 seconds | Crawl-delay directive for compliant bots |
+
+#### Configuration via API
+
+```sh
+# Get current robots.txt config and preview
+curl -H "Authorization: Bearer changeme-supersecret" \
+  http://127.0.0.1:3000/admin/robots
+
+# Update robots.txt policy
+curl -X POST -H "Authorization: Bearer changeme-supersecret" \
+  -H "Content-Type: application/json" \
+  -d '{"robots_enabled": true, "robots_block_ai_training": true, "robots_crawl_delay": 5}' \
+  http://127.0.0.1:3000/admin/config
+```
+
+#### Content-Signal Header
+
+Responses include a `Content-Signal` HTTP header implementing Cloudflare's proposed standard:
+```
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+```
 
 ---
 

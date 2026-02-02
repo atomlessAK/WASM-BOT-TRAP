@@ -180,26 +180,26 @@
           <button id="save-maze-config">💾 Save Maze Settings</button>
         </div>
         <div class="control-group">
-          <h3>🤖 AI Crawler Policy</h3>
-          <p class="control-desc">Control what bots can crawl via robots.txt</p>
+          <h3>📜 AI Training Opt-Out Policy</h3>
+          <p class="control-desc">Declare crawling policies via robots.txt (advisory, not enforcement)</p>
           <div class="robots-admin-controls">
             <div class="robots-toggle-row">
-              <label class="robots-admin-label">Enable robots.txt</label>
+              <label class="robots-admin-label">Serve robots.txt</label>
               <label class="toggle-switch">
                 <input type="checkbox" id="robots-enabled-toggle" checked>
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="robots-toggle-row">
-              <label class="robots-admin-label">Block AI Training</label>
+              <label class="robots-admin-label">Opt-out AI Training</label>
               <label class="toggle-switch">
                 <input type="checkbox" id="robots-block-training-toggle" checked>
                 <span class="toggle-slider"></span>
               </label>
-              <span class="toggle-hint">GPTBot, CCBot, etc.</span>
+              <span class="toggle-hint">GPTBot, CCBot, ClaudeBot</span>
             </div>
             <div class="robots-toggle-row">
-              <label class="robots-admin-label">Block AI Search</label>
+              <label class="robots-admin-label">Opt-out AI Search</label>
               <label class="toggle-switch">
                 <input type="checkbox" id="robots-block-search-toggle">
                 <span class="toggle-slider"></span>
@@ -207,9 +207,9 @@
               <span class="toggle-hint">PerplexityBot, etc.</span>
             </div>
             <div class="robots-toggle-row">
-              <label class="robots-admin-label">Allow Search Engines</label>
+              <label class="robots-admin-label">Restrict Search Engines</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="robots-allow-search-toggle" checked>
+                <input type="checkbox" id="robots-allow-search-toggle">
                 <span class="toggle-slider"></span>
               </label>
               <span class="toggle-hint">Google, Bing, etc.</span>
@@ -220,8 +220,8 @@
               <span class="delay-unit">seconds</span>
             </div>
           </div>
-          <button id="save-robots-config">💾 Save Robots Policy</button>
-          <button id="preview-robots">👁️ Preview robots.txt</button>
+          <button id="save-robots-config" disabled>📝 Update Policy</button>
+          <button id="preview-robots">👁️ Show robots.txt</button>
           <div id="robots-preview" class="robots-preview hidden">
             <h4>robots.txt Preview</h4>
             <pre id="robots-preview-content"></pre>

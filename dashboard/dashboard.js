@@ -372,7 +372,17 @@ function updateMazeConfig(config) {
 }
 
 // Update robots.txt config controls from loaded config
+// Track saved state for change detection
+let robotsSavedState = {
+  enabled: true,
+  blockTraining: true,
+  blockSearch: false,
+  allowSearch: false,  // This is the toggle state (inverted from allow_search_engines)
+  crawlDelay: 2
+};
+
 function updateRobotsConfig(config) {
+  // Update toggles from server config
   if (config.robots_enabled !== undefined) {
     document.getElementById('robots-enabled-toggle').checked = config.robots_enabled;
   }
@@ -383,12 +393,54 @@ function updateRobotsConfig(config) {
     document.getElementById('robots-block-search-toggle').checked = config.robots_block_ai_search;
   }
   if (config.robots_allow_search_engines !== undefined) {
-    document.getElementById('robots-allow-search-toggle').checked = config.robots_allow_search_engines;
+    // Invert: toggle ON = restrict (allow=false), toggle OFF = allow (allow=true)
+    document.getElementById('robots-allow-search-toggle').checked = !config.robots_allow_search_engines;
   }
   if (config.robots_crawl_delay !== undefined) {
     document.getElementById('robots-crawl-delay').value = config.robots_crawl_delay;
   }
+  // Store saved state for change detection (read from DOM after updates)
+  robotsSavedState = {
+    enabled: document.getElementById('robots-enabled-toggle').checked,
+    blockTraining: document.getElementById('robots-block-training-toggle').checked,
+    blockSearch: document.getElementById('robots-block-search-toggle').checked,
+    allowSearch: document.getElementById('robots-allow-search-toggle').checked,
+    crawlDelay: parseInt(document.getElementById('robots-crawl-delay').value) || 2
+  };
+  // Reset button state
+  const btn = document.getElementById('save-robots-config');
+  btn.disabled = true;
+  btn.textContent = '📝 Update Policy';
 }
+
+// Check if robots config has changed from saved state
+function checkRobotsConfigChanged() {
+  const current = {
+    enabled: document.getElementById('robots-enabled-toggle').checked,
+    blockTraining: document.getElementById('robots-block-training-toggle').checked,
+    blockSearch: document.getElementById('robots-block-search-toggle').checked,
+    allowSearch: document.getElementById('robots-allow-search-toggle').checked,
+    crawlDelay: parseInt(document.getElementById('robots-crawl-delay').value) || 2
+  };
+  const changed = (
+    current.enabled !== robotsSavedState.enabled ||
+    current.blockTraining !== robotsSavedState.blockTraining ||
+    current.blockSearch !== robotsSavedState.blockSearch ||
+    current.allowSearch !== robotsSavedState.allowSearch ||
+    current.crawlDelay !== robotsSavedState.crawlDelay
+  );
+  const btn = document.getElementById('save-robots-config');
+  btn.disabled = !changed;
+  if (changed) {
+    btn.textContent = '📝 Update Policy';
+  }
+}
+
+// Add change listeners for robots config controls
+['robots-enabled-toggle', 'robots-block-training-toggle', 'robots-block-search-toggle', 'robots-allow-search-toggle'].forEach(id => {
+  document.getElementById(id).addEventListener('change', checkRobotsConfigChanged);
+});
+document.getElementById('robots-crawl-delay').addEventListener('input', checkRobotsConfigChanged);
 
 // Save maze configuration
 document.getElementById('save-maze-config').onclick = async function() {
@@ -443,7 +495,8 @@ document.getElementById('save-robots-config').onclick = async function() {
   const robotsEnabled = document.getElementById('robots-enabled-toggle').checked;
   const blockTraining = document.getElementById('robots-block-training-toggle').checked;
   const blockSearch = document.getElementById('robots-block-search-toggle').checked;
-  const allowSearchEngines = document.getElementById('robots-allow-search-toggle').checked;
+  // Invert: toggle ON = restrict (allow=false), toggle OFF = allow (allow=true)
+  const allowSearchEngines = !document.getElementById('robots-allow-search-toggle').checked;
   const crawlDelay = parseInt(document.getElementById('robots-crawl-delay').value) || 2;
   
   btn.textContent = 'Saving...';
@@ -467,36 +520,39 @@ document.getElementById('save-robots-config').onclick = async function() {
     
     if (!resp.ok) throw new Error('Failed to save config');
     
-    btn.textContent = '✓ Saved!';
+    btn.textContent = '✓ Updated!';
+    // Update saved state to current values (store toggle states, not server values)
+    robotsSavedState = {
+      enabled: robotsEnabled,
+      blockTraining: blockTraining,
+      blockSearch: blockSearch,
+      allowSearch: document.getElementById('robots-allow-search-toggle').checked,  // Store toggle state
+      crawlDelay: crawlDelay
+    };
     // Refresh preview if it's visible
     const preview = document.getElementById('robots-preview');
     if (!preview.classList.contains('hidden')) {
-      document.getElementById('preview-robots').click();
+      refreshRobotsPreview();
     }
     setTimeout(() => {
-      btn.textContent = '💾 Save Robots Policy';
-      btn.disabled = false;
+      btn.textContent = '📝 Update Policy';
+      btn.disabled = true; // Disable since we just saved
     }, 1500);
   } catch (e) {
     btn.textContent = '✗ Error';
     console.error('Failed to save robots config:', e);
     setTimeout(() => {
-      btn.textContent = '💾 Save Robots Policy';
-      btn.disabled = false;
+      btn.textContent = '📝 Update Policy';
+      btn.disabled = false; // Keep enabled so they can retry
     }, 2000);
   }
 };
 
-// Preview robots.txt
-document.getElementById('preview-robots').onclick = async function() {
+// Fetch and update robots.txt preview content
+async function refreshRobotsPreview() {
   const endpoint = document.getElementById('endpoint').value.replace(/\/$/, '');
   const apikey = document.getElementById('apikey').value;
-  const preview = document.getElementById('robots-preview');
   const previewContent = document.getElementById('robots-preview-content');
-  const btn = this;
-  
-  btn.textContent = 'Loading...';
-  btn.disabled = true;
   
   try {
     const resp = await fetch(endpoint + '/admin/robots', {
@@ -507,16 +563,29 @@ document.getElementById('preview-robots').onclick = async function() {
     
     const data = await resp.json();
     previewContent.textContent = data.preview || '# No preview available';
-    preview.classList.remove('hidden');
-    
-    btn.textContent = '👁️ Preview robots.txt';
-    btn.disabled = false;
   } catch (e) {
     previewContent.textContent = '# Error loading preview: ' + e.message;
-    preview.classList.remove('hidden');
     console.error('Failed to load robots preview:', e);
-    btn.textContent = '👁️ Preview robots.txt';
+  }
+}
+
+// Toggle robots.txt preview visibility
+document.getElementById('preview-robots').onclick = async function() {
+  const preview = document.getElementById('robots-preview');
+  const btn = this;
+  
+  if (preview.classList.contains('hidden')) {
+    // Show preview
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
+    await refreshRobotsPreview();
+    preview.classList.remove('hidden');
+    btn.textContent = '🙈 Hide robots.txt';
     btn.disabled = false;
+  } else {
+    // Hide preview
+    preview.classList.add('hidden');
+    btn.textContent = '👁️ Show robots.txt';
   }
 };
 
