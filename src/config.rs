@@ -54,11 +54,17 @@ pub struct Config {
     #[serde(default)]
     pub maze_enabled: bool,          // Enable link maze honeypot
     #[serde(default = "default_maze_auto_ban")]
-    pub maze_auto_ban: bool,         // Auto-ban after 50 maze page hits
+    pub maze_auto_ban: bool,         // Auto-ban after threshold maze page hits
+    #[serde(default = "default_maze_auto_ban_threshold")]
+    pub maze_auto_ban_threshold: u32, // Number of maze pages before auto-ban
 }
 
 fn default_maze_auto_ban() -> bool {
     true
+}
+
+fn default_maze_auto_ban_threshold() -> u32 {
+    50
 }
 
 impl Config {
@@ -88,7 +94,8 @@ impl Config {
             path_whitelist: vec![],
             test_mode,
             maze_enabled: true,        // Maze enabled by default
-            maze_auto_ban: true,       // Auto-ban crawlers after 50 maze hits
+            maze_auto_ban: true,       // Auto-ban crawlers after threshold
+            maze_auto_ban_threshold: 50, // Default: 50 maze pages triggers ban
         }
     }
     

@@ -64,6 +64,32 @@
           <span class="maze-value" id="maze-auto-bans">-</span>
         </div>
       </div>
+      <div class="maze-controls">
+        <div class="maze-control-row">
+          <div class="maze-control">
+            <label>Maze Enabled</label>
+            <label class="toggle-switch maze-toggle">
+              <input type="checkbox" id="maze-enabled-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="maze-control">
+            <label>Auto-Ban</label>
+            <label class="toggle-switch maze-toggle">
+              <input type="checkbox" id="maze-auto-ban-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="maze-control">
+            <label>Ban Threshold</label>
+            <div class="threshold-input">
+              <input type="number" id="maze-threshold" value="50" min="5" max="500">
+              <span class="threshold-label">pages</span>
+            </div>
+          </div>
+          <button id="save-maze-config" class="maze-save-btn">💾 Save</button>
+        </div>
+      </div>
       <div class="maze-crawlers">
         <h3>🤖 Top Crawlers in Maze</h3>
         <div class="crawler-list" id="maze-crawler-list">

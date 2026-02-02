@@ -132,9 +132,9 @@ pub fn handle_bot_trap_impl(req: &Request) -> Response {
             // Increment maze hit counter for this IP
             let _ = store.set(&maze_key, (hits + 1).to_string().as_bytes());
             
-            // If they've hit 50+ maze pages, they're definitely a bot - ban them
+            // If they've hit the threshold, they're definitely a bot - ban them
             let cfg = config::Config::load(&store, "default");
-            if hits >= 50 && cfg.maze_auto_ban {
+            if hits >= cfg.maze_auto_ban_threshold && cfg.maze_auto_ban {
                 ban::ban_ip(&store, "default", &ip, "maze_crawler", cfg.get_ban_duration("honeypot"));
                 metrics::increment(&store, metrics::MetricName::BansTotal, Some("maze_crawler"));
                 crate::admin::log_event(&store, &crate::admin::EventLogEntry {
@@ -142,7 +142,7 @@ pub fn handle_bot_trap_impl(req: &Request) -> Response {
                     event: crate::admin::EventType::Ban,
                     ip: Some(ip.clone()),
                     reason: Some("maze_crawler".to_string()),
-                    outcome: Some("banned_after_50_maze_pages".to_string()),
+                    outcome: Some(format!("banned_after_{}_maze_pages", cfg.maze_auto_ban_threshold)),
                     admin: None,
                 });
             }

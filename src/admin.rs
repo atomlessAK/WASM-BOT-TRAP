@@ -287,6 +287,20 @@ pub fn handle_admin(req: &Request) -> Response {
                         }
                     }
                     
+                    // Update maze settings if provided
+                    if let Some(maze_enabled) = json.get("maze_enabled").and_then(|v| v.as_bool()) {
+                        cfg.maze_enabled = maze_enabled;
+                        changed = true;
+                    }
+                    if let Some(maze_auto_ban) = json.get("maze_auto_ban").and_then(|v| v.as_bool()) {
+                        cfg.maze_auto_ban = maze_auto_ban;
+                        changed = true;
+                    }
+                    if let Some(maze_auto_ban_threshold) = json.get("maze_auto_ban_threshold").and_then(|v| v.as_u64()) {
+                        cfg.maze_auto_ban_threshold = maze_auto_ban_threshold as u32;
+                        changed = true;
+                    }
+                    
                     // Save config to KV store
                     if changed {
                         let key = format!("config:{}", site_id);
@@ -308,7 +322,10 @@ pub fn handle_admin(req: &Request) -> Response {
                             },
                             "rate_limit": cfg.rate_limit,
                             "honeypots": cfg.honeypots,
-                            "geo_risk": cfg.geo_risk
+                            "geo_risk": cfg.geo_risk,
+                            "maze_enabled": cfg.maze_enabled,
+                            "maze_auto_ban": cfg.maze_auto_ban,
+                            "maze_auto_ban_threshold": cfg.maze_auto_ban_threshold
                         }
                     })).unwrap();
                     return Response::new(200, body);
@@ -341,7 +358,10 @@ pub fn handle_admin(req: &Request) -> Response {
                 "browser_whitelist": cfg.browser_whitelist,
                 "geo_risk": cfg.geo_risk,
                 "whitelist": cfg.whitelist,
-                "path_whitelist": cfg.path_whitelist
+                "path_whitelist": cfg.path_whitelist,
+                "maze_enabled": cfg.maze_enabled,
+                "maze_auto_ban": cfg.maze_auto_ban,
+                "maze_auto_ban_threshold": cfg.maze_auto_ban_threshold
             })).unwrap();
             Response::new(200, body)
         }

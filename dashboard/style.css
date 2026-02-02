@@ -586,6 +586,86 @@ input:checked + .toggle-slider:before {
   color: white;
 }
 
+.maze-controls {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.maze-control-row {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.maze-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.maze-control label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.maze-toggle {
+  transform: scale(0.9);
+}
+
+.threshold-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.threshold-input input {
+  width: 80px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.threshold-input input:focus {
+  outline: none;
+  border-color: #a78bfa;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.threshold-label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.maze-save-btn {
+  padding: 10px 20px;
+  background: #a78bfa;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.maze-save-btn:hover {
+  background: #8b5cf6;
+  transform: translateY(-1px);
+}
+
+.maze-save-btn:active {
+  transform: translateY(0);
+}
+
 .crawler-list {
   display: flex;
   flex-direction: column;

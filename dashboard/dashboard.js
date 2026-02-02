@@ -358,6 +358,63 @@ function updateMazeStats(data) {
   }).join('');
 }
 
+// Update maze config controls from loaded config
+function updateMazeConfig(config) {
+  if (config.maze_enabled !== undefined) {
+    document.getElementById('maze-enabled-toggle').checked = config.maze_enabled;
+  }
+  if (config.maze_auto_ban !== undefined) {
+    document.getElementById('maze-auto-ban-toggle').checked = config.maze_auto_ban;
+  }
+  if (config.maze_auto_ban_threshold !== undefined) {
+    document.getElementById('maze-threshold').value = config.maze_auto_ban_threshold;
+  }
+}
+
+// Save maze configuration
+document.getElementById('save-maze-config').onclick = async function() {
+  const endpoint = document.getElementById('endpoint').value.replace(/\/$/, '');
+  const apikey = document.getElementById('apikey').value;
+  const btn = this;
+  
+  const mazeEnabled = document.getElementById('maze-enabled-toggle').checked;
+  const mazeAutoBan = document.getElementById('maze-auto-ban-toggle').checked;
+  const mazeThreshold = parseInt(document.getElementById('maze-threshold').value) || 50;
+  
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  
+  try {
+    const resp = await fetch(endpoint + '/admin/config', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apikey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        maze_enabled: mazeEnabled,
+        maze_auto_ban: mazeAutoBan,
+        maze_auto_ban_threshold: mazeThreshold
+      })
+    });
+    
+    if (!resp.ok) throw new Error('Failed to save config');
+    
+    btn.textContent = '✓ Saved!';
+    setTimeout(() => {
+      btn.textContent = '💾 Save';
+      btn.disabled = false;
+    }, 1500);
+  } catch (e) {
+    btn.textContent = '✗ Error';
+    console.error('Failed to save maze config:', e);
+    setTimeout(() => {
+      btn.textContent = '💾 Save';
+      btn.disabled = false;
+    }, 2000);
+  }
+};
+
 // Main refresh function
 document.getElementById('refresh').onclick = async function() {
   const endpoint = document.getElementById('endpoint').value.replace(/\/$/, '');
@@ -416,9 +473,10 @@ document.getElementById('refresh').onclick = async function() {
       if (configResp.ok) {
         const config = await configResp.json();
         updateBanDurations(config);
+        updateMazeConfig(config);
       }
     } catch (e) {
-      console.error('Failed to load ban durations:', e);
+      console.error('Failed to load config:', e);
     }
     
     // Update last updated time
