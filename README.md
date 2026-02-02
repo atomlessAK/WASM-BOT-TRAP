@@ -85,11 +85,11 @@ Before deploying any bot protection, it's critical to understand that **Akamai B
 
 > **Industry Context**: According to [Cloudflare Radar](https://radar.cloudflare.com/traffic), approximately 31% of all internet HTTP traffic is automated (bot) traffic. Of this, a significant portion consists of sophisticated "evasive bots" designed to mimic human behavior.
 
-**Bot Manager is not optional for serious bot defense—it's the foundation.**
+**Bot Manager is the foundation for bot defense. For any serious, business-critical use cases it should be considered a mandatory addition.**
 
 ### 🔧 Why WASM Bot Trap Adds Value
 
-So why deploy this bot trap if Bot Manager is so comprehensive? Because **Bot Manager excels at broad, ML-based detection, while Bot Trap excels at application-specific, surgical precision**:
+Bot Manager excels at broad, ML-based detection. WASM Bot Trap complements this with application-specific, surgical precision:
 
 - **Application-Specific Honeypots**: Create trap URLs that only bots targeting *your specific application* would access (e.g., fake admin panels, hidden form fields unique to your CMS)
 - **Business Logic Enforcement**: Implement rules that understand your application's context—session state, user roles, purchase flows
