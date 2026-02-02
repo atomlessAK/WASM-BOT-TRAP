@@ -7,7 +7,7 @@ This project implements a customizable, behavior-based bot defense system design
 
 ![Dashboard Details](assets/dashboard-screenshot2.jpg)
 
-## � Documentation
+## 📚 Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -21,7 +21,7 @@ This project implements a customizable, behavior-based bot defense system design
 
 ---
 
-## �🚀 Primary Platform: Fermyon Cloud (Edge WASM)
+## 🚀 Primary Platform: Fermyon Cloud (Edge WASM)
 
 This bot trap is **primarily built and tested for deployment on Fermyon Cloud**. Fermyon Spin enables serverless WebAssembly execution at the edge, providing:
 
