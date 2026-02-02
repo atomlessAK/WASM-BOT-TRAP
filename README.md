@@ -59,6 +59,140 @@ See [DASHBOARD.md](DASHBOARD.md) for complete dashboard documentation.
 
 ## 🎯 Primary Deployment: Fermyon Cloud
 
+### 🛡️ Why Akamai Bot Manager is Essential
+
+Before deploying any bot protection, it's critical to understand that **Akamai Bot Manager should be your first line of defense**. Bot Manager provides enterprise-grade protection that no custom solution can replicate:
+
+- **Machine Learning at Scale**: Trained on trillions of requests across Akamai's global network, Bot Manager identifies sophisticated bots that rule-based systems miss
+- **Behavioral Biometrics**: Analyzes mouse movements, keyboard patterns, and touch gestures to distinguish humans from automation
+- **Real-time Threat Intelligence**: Access to Akamai's continuously updated database of 1,700+ known bots and global IP reputation data
+- **Zero-Day Protection**: ML models detect new bot variants without requiring rule updates
+- **Compliance Ready**: Enterprise SLAs, SOC2/PCI-DSS reporting, and 24/7 support
+
+**Bot Manager is not optional for serious bot defense—it's the foundation.**
+
+### 🔧 Why WASM Bot Trap Adds Value
+
+So why deploy this bot trap if Bot Manager is so comprehensive? Because **Bot Manager excels at broad detection, while Bot Trap excels at surgical precision**:
+
+- **Application-Specific Honeypots**: Create trap URLs that only bots targeting *your specific application* would access (e.g., fake admin panels, hidden form fields)
+- **Business Logic Enforcement**: Implement rules that understand your application's context—session state, user roles, purchase flows
+- **Custom Challenges**: Deploy unique challenge types that Bot Manager doesn't offer (math quizzes, interactive puzzles, custom JS)
+- **Rapid Response**: When you discover a new attack pattern, deploy a countermeasure in minutes without waiting for vendor updates
+- **Cost Optimization**: Open source with no per-request fees—ideal for high-traffic sites already paying for Bot Manager
+- **Full Auditability**: Review and modify every line of detection code for compliance or security reviews
+
+**Think of it as: Bot Manager catches 95% of bots automatically. Bot Trap catches the 5% that slip through with rules tailored to your application.**
+
+### Comprehensive Feature Comparison
+
+#### Detection Capabilities
+
+| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
+|------------|-------------------|---------------|-------|
+| **Machine Learning Detection** | ✅ Advanced ML models | ❌ Not available | Bot Manager uses proprietary ML trained on Akamai's global traffic |
+| **Behavioral Analysis** | ✅ Mouse, keyboard, touch patterns | ❌ Not available | Requires client-side SDK for full behavioral data |
+| **Device Fingerprinting** | ✅ 200+ signals | ⚠️ Basic (User-Agent only) | Bot Manager fingerprints hardware, fonts, canvas, WebGL, etc. |
+| **Bot Signature Database** | ✅ 1,700+ known bots | ❌ Not available | Continuously updated by Akamai threat research |
+| **IP Reputation** | ✅ Global threat intelligence | ⚠️ Manual lists only | Bot Manager uses real-time reputation from Akamai network |
+| **JavaScript Challenge** | ✅ Crypto challenges | ✅ Cookie-based verification | Both can inject JS; Bot Manager's is more sophisticated |
+| **CAPTCHA Integration** | ✅ Built-in | ❌ Not built-in | Bot Manager integrates reCAPTCHA, hCaptcha, Akamai CAPTCHA |
+| **Honeypot Detection** | ⚠️ Limited | ✅ Fully customizable | Bot Trap excels at app-specific honeypots |
+| **Rate Limiting** | ✅ Policy-based | ✅ Per-IP with time windows | Both support rate limiting; Bot Trap is more customizable |
+| **Geo-based Blocking** | ✅ Country/region policies | ✅ Country-based risk scoring | Similar capabilities |
+
+#### Management & Operations
+
+| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
+|------------|-------------------|---------------|-------|
+| **Management Interface** | Akamai Control Center (GUI) | REST API + Web Dashboard | Bot Manager has enterprise UI; Bot Trap is API-first |
+| **Configuration Method** | Policy rules via UI | Code + KV store | Bot Trap requires development skills but offers more control |
+| **Real-time Updates** | ✅ Instant policy changes | ✅ Instant via API | Both support real-time config updates |
+| **Logging & Analytics** | ✅ Akamai SIEM integration | ✅ Built-in event log + API | Bot Manager integrates with enterprise SIEM |
+| **Alerting** | ✅ Configurable alerts | ⚠️ Manual integration | Bot Trap requires custom alerting setup |
+| **A/B Testing** | ✅ Built-in | ❌ Manual implementation | Bot Manager supports testing different bot policies |
+| **Reporting** | ✅ Executive dashboards | ⚠️ Basic dashboard | Bot Manager has compliance-ready reports |
+
+#### Customization & Extensibility
+
+| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
+|------------|-------------------|---------------|-------|
+| **Custom Detection Rules** | ⚠️ Limited to policy options | ✅ Full code-level control | Bot Trap allows any custom logic in Rust |
+| **Custom Response Pages** | ✅ Branded block pages | ✅ Fully customizable HTML | Both support custom responses |
+| **Application-Aware Logic** | ⚠️ Generic policies | ✅ Can read cookies, headers, body | Bot Trap can implement business logic |
+| **Custom Challenges** | ⚠️ Pre-built challenges | ✅ Math quiz, custom JS, etc. | Bot Trap allows any challenge type |
+| **Webhook Integration** | ✅ Configurable | ✅ Path whitelist for webhooks | Both can protect webhook endpoints |
+| **API Protection** | ✅ API-specific policies | ✅ Custom per-endpoint rules | Bot Trap can implement GraphQL-aware rules |
+| **Open Source** | ❌ Proprietary | ✅ Full source access | Bot Trap can be audited and modified |
+
+#### Deployment & Cost
+
+| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
+|------------|-------------------|---------------|-------|
+| **Deployment Model** | Akamai-managed SaaS | Self-hosted or Fermyon Cloud | Bot Manager is zero-ops; Bot Trap requires management |
+| **Scaling** | ✅ Automatic, global | ✅ Depends on platform | Both scale well on edge platforms |
+| **Latency Impact** | < 1ms (edge) | < 1ms (WASM edge) | Negligible for both when at edge |
+| **Cost Model** | Per-request licensing | Open source + hosting | Bot Trap is cost-effective for high traffic |
+| **SLA** | ✅ Enterprise SLA | ❌ Self-managed | Bot Manager includes uptime guarantees |
+| **Support** | ✅ 24/7 Akamai support | ❌ Community/self-support | Enterprise support with Bot Manager |
+
+#### Security & Compliance
+
+| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
+|------------|-------------------|---------------|-------|
+| **Credential Stuffing Protection** | ✅ Specialized detection | ⚠️ Rate limiting only | Bot Manager detects credential abuse patterns |
+| **Account Takeover (ATO)** | ✅ Login anomaly detection | ❌ Not available | Requires behavioral analysis |
+| **Web Scraping Protection** | ✅ Content protection | ⚠️ Basic (honeypots, rate limits) | Bot Manager detects scraping patterns |
+| **API Abuse Prevention** | ✅ API-specific policies | ✅ Custom rate limits | Bot Trap can implement custom API rules |
+| **Compliance Reporting** | ✅ SOC2, PCI-DSS ready | ❌ Manual reporting | Bot Manager provides compliance artifacts |
+| **Constant-Time Auth** | N/A (managed) | ✅ Timing-attack resistant | Bot Trap API uses secure comparison |
+
+#### Summary: What Each Solution Provides
+
+**Bot Manager Exclusive Capabilities (WASM Bot Trap Cannot Do):**
+- 🧠 ML/AI-based bot detection trained on global traffic patterns
+- 👆 Behavioral biometrics (mouse movement, typing patterns, touch gestures)
+- 🔍 Advanced device fingerprinting (200+ signals)
+- 📚 Known bot signature database (1,700+ bots, continuously updated)
+- 🌐 Real-time global IP reputation from Akamai's network
+- 🎯 Credential stuffing and account takeover detection
+- 📊 Enterprise reporting and compliance artifacts
+- 🛎️ 24/7 managed support with SLA
+
+**WASM Bot Trap Exclusive Capabilities (Adds On Top of Bot Manager):**
+- 🎣 **Custom Honeypots**: Create app-specific trap URLs that only bots would access
+- 🔧 **Full Code Control**: Implement any detection logic in Rust—no policy limitations
+- 🧩 **Application-Aware Rules**: Read session cookies, parse request bodies, implement business logic
+- 🎮 **Custom Challenges**: Build unique challenge flows (math quiz, custom JS, interactive tests)
+- 💰 **Cost Effective**: Open source, no per-request licensing for high-traffic sites
+- 🔓 **Auditable**: Full source code access for security review and customization
+- ⚡ **Rapid Iteration**: Deploy new detection rules in minutes without vendor involvement
+- 🔌 **Integration Freedom**: Connect to any backend, database, or third-party service
+
+#### Recommended Architecture: Layered Defense
+
+For maximum protection, use **Bot Manager as the first line of defense** with the WASM bot trap providing **application-specific protections**:
+
+```
+Internet → Akamai Edge / Fermyon Edge
+              ↓
+        Bot Manager (Layer 1)
+        - Known bot detection
+        - Bot scoring & categorization
+        - Fingerprinting
+        - Behavioral analysis
+              ↓
+        WASM Bot Trap (Layer 2)
+        - Custom honeypots for your app
+        - Application-specific rate limits
+        - Business logic-based blocking
+        - Custom challenge flows
+              ↓
+        Origin Application
+```
+
+---
+
 ### Deploy to Fermyon Cloud
 
 **Step 1: Build for Production**
@@ -155,193 +289,7 @@ Internet → Akamai Edge (CDN) → EdgeWorkers/Compute@Edge (WASM)
 - Seamless integration with existing Akamai properties
 - Global edge network with 4,000+ points of presence
 
-### 🤖 Integration with Akamai Bot Manager
-
-**Akamai Bot Manager** is Akamai's enterprise-grade bot detection and mitigation solution that uses machine learning, behavioral analysis, and fingerprinting to identify and manage bot traffic. When deploying the WASM bot trap on Akamai infrastructure, you should understand how these two solutions can work together.
-
-#### Comprehensive Feature Comparison
-
-##### Detection Capabilities
-
-| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
-|------------|-------------------|---------------|-------|
-| **Machine Learning Detection** | ✅ Advanced ML models | ❌ Not available | Bot Manager uses proprietary ML trained on Akamai's global traffic |
-| **Behavioral Analysis** | ✅ Mouse, keyboard, touch patterns | ❌ Not available | Requires client-side SDK for full behavioral data |
-| **Device Fingerprinting** | ✅ 200+ signals | ⚠️ Basic (User-Agent only) | Bot Manager fingerprints hardware, fonts, canvas, WebGL, etc. |
-| **Bot Signature Database** | ✅ 1,700+ known bots | ❌ Not available | Continuously updated by Akamai threat research |
-| **IP Reputation** | ✅ Global threat intelligence | ⚠️ Manual lists only | Bot Manager uses real-time reputation from Akamai network |
-| **JavaScript Challenge** | ✅ Crypto challenges | ✅ Cookie-based verification | Both can inject JS; Bot Manager's is more sophisticated |
-| **CAPTCHA Integration** | ✅ Built-in | ❌ Not built-in | Bot Manager integrates reCAPTCHA, hCaptcha, Akamai CAPTCHA |
-| **Honeypot Detection** | ⚠️ Limited | ✅ Fully customizable | Bot Trap excels at app-specific honeypots |
-| **Rate Limiting** | ✅ Policy-based | ✅ Per-IP with time windows | Both support rate limiting; Bot Trap is more customizable |
-| **Geo-based Blocking** | ✅ Country/region policies | ✅ Country-based risk scoring | Similar capabilities |
-
-##### Management & Operations
-
-| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
-|------------|-------------------|---------------|-------|
-| **Management Interface** | Akamai Control Center (GUI) | REST API + Web Dashboard | Bot Manager has enterprise UI; Bot Trap is API-first |
-| **Configuration Method** | Policy rules via UI | Code + KV store | Bot Trap requires development skills but offers more control |
-| **Real-time Updates** | ✅ Instant policy changes | ✅ Instant via API | Both support real-time config updates |
-| **Logging & Analytics** | ✅ Akamai SIEM integration | ✅ Built-in event log + API | Bot Manager integrates with enterprise SIEM |
-| **Alerting** | ✅ Configurable alerts | ⚠️ Manual integration | Bot Trap requires custom alerting setup |
-| **A/B Testing** | ✅ Built-in | ❌ Manual implementation | Bot Manager supports testing different bot policies |
-| **Reporting** | ✅ Executive dashboards | ⚠️ Basic dashboard | Bot Manager has compliance-ready reports |
-
-##### Customization & Extensibility
-
-| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
-|------------|-------------------|---------------|-------|
-| **Custom Detection Rules** | ⚠️ Limited to policy options | ✅ Full code-level control | Bot Trap allows any custom logic in Rust |
-| **Custom Response Pages** | ✅ Branded block pages | ✅ Fully customizable HTML | Both support custom responses |
-| **Application-Aware Logic** | ⚠️ Generic policies | ✅ Can read cookies, headers, body | Bot Trap can implement business logic |
-| **Custom Challenges** | ⚠️ Pre-built challenges | ✅ Math quiz, custom JS, etc. | Bot Trap allows any challenge type |
-| **Webhook Integration** | ✅ Configurable | ✅ Path whitelist for webhooks | Both can protect webhook endpoints |
-| **API Protection** | ✅ API-specific policies | ✅ Custom per-endpoint rules | Bot Trap can implement GraphQL-aware rules |
-| **Open Source** | ❌ Proprietary | ✅ Full source access | Bot Trap can be audited and modified |
-
-##### Deployment & Cost
-
-| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
-|------------|-------------------|---------------|-------|
-| **Deployment Model** | Akamai-managed SaaS | Self-hosted or Fermyon Cloud | Bot Manager is zero-ops; Bot Trap requires management |
-| **Scaling** | ✅ Automatic, global | ✅ Depends on platform | Both scale well on edge platforms |
-| **Latency Impact** | < 1ms (edge) | < 1ms (WASM edge) | Negligible for both when at edge |
-| **Cost Model** | Per-request licensing | Open source + hosting | Bot Trap is cost-effective for high traffic |
-| **SLA** | ✅ Enterprise SLA | ❌ Self-managed | Bot Manager includes uptime guarantees |
-| **Support** | ✅ 24/7 Akamai support | ❌ Community/self-support | Enterprise support with Bot Manager |
-
-##### Security & Compliance
-
-| Capability | Akamai Bot Manager | WASM Bot Trap | Notes |
-|------------|-------------------|---------------|-------|
-| **Credential Stuffing Protection** | ✅ Specialized detection | ⚠️ Rate limiting only | Bot Manager detects credential abuse patterns |
-| **Account Takeover (ATO)** | ✅ Login anomaly detection | ❌ Not available | Requires behavioral analysis |
-| **Web Scraping Protection** | ✅ Content protection | ⚠️ Basic (honeypots, rate limits) | Bot Manager detects scraping patterns |
-| **API Abuse Prevention** | ✅ API-specific policies | ✅ Custom rate limits | Bot Trap can implement custom API rules |
-| **Compliance Reporting** | ✅ SOC2, PCI-DSS ready | ❌ Manual reporting | Bot Manager provides compliance artifacts |
-| **Constant-Time Auth** | N/A (managed) | ✅ Timing-attack resistant | Bot Trap API uses secure comparison |
-
-#### Summary: What Each Solution Provides
-
-**Bot Manager Exclusive Capabilities (WASM Bot Trap Cannot Do):**
-- 🧠 ML/AI-based bot detection trained on global traffic patterns
-- 👆 Behavioral biometrics (mouse movement, typing patterns, touch gestures)
-- 🔍 Advanced device fingerprinting (200+ signals)
-- 📚 Known bot signature database (1,700+ bots, continuously updated)
-- 🌐 Real-time global IP reputation from Akamai's network
-- 🎯 Credential stuffing and account takeover detection
-- 📊 Enterprise reporting and compliance artifacts
-- 🛎️ 24/7 managed support with SLA
-
-**WASM Bot Trap Exclusive Capabilities (Adds On Top of Bot Manager):**
-- 🎣 **Custom Honeypots**: Create app-specific trap URLs that only bots would access
-- 🔧 **Full Code Control**: Implement any detection logic in Rust—no policy limitations
-- 🧩 **Application-Aware Rules**: Read session cookies, parse request bodies, implement business logic
-- 🎮 **Custom Challenges**: Build unique challenge flows (math quiz, custom JS, interactive tests)
-- 💰 **Cost Effective**: Open source, no per-request licensing for high-traffic sites
-- 🔓 **Auditable**: Full source code access for security review and customization
-- ⚡ **Rapid Iteration**: Deploy new detection rules in minutes without vendor involvement
-- 🔌 **Integration Freedom**: Connect to any backend, database, or third-party service
-
-#### Recommended Architecture: Layered Defense
-
-For maximum protection, use **Bot Manager as the first line of defense** with the WASM bot trap providing **application-specific protections**:
-
-```
-Internet → Akamai Edge
-              ↓
-        Bot Manager (Layer 1)
-        - Known bot detection
-        - Bot scoring & categorization
-        - Fingerprinting
-        - Behavioral analysis
-              ↓
-        EdgeWorkers / WASM Bot Trap (Layer 2)
-        - Custom honeypots for your app
-        - Application-specific rate limits
-        - Business logic-based blocking
-        - Custom challenge flows
-              ↓
-        Origin Application
-```
-
-#### When to Use Each Solution
-
-**Use Akamai Bot Manager for:**
-- Detecting known commercial bots (scrapers, SEO tools, etc.)
-- Identifying sophisticated bots using ML-based behavioral analysis
-- Managing bot traffic with granular policies (allow, block, throttle, challenge)
-- Protecting against credential stuffing and account takeover (ATO)
-- Compliance with bot management SLAs and reporting
-
-**Use WASM Bot Trap for:**
-- Custom honeypot URLs specific to your application
-- Application-aware rate limiting (e.g., per-endpoint limits)
-- Custom JavaScript challenges tailored to your site
-- Rapid prototyping of new detection rules
-- Protecting specific high-value endpoints with custom logic
-- Cost-effective protection for smaller properties
-
-**Use Both Together for:**
-- Defense in depth with multiple detection layers
-- Catching bots that evade one layer with the other
-- Custom application logic that Bot Manager can't handle
-- Extending Bot Manager with application-specific rules
-
-#### Configuration: Bot Manager + WASM Bot Trap
-
-**Step 1: Configure Bot Manager First**
-
-In Akamai Control Center:
-1. Enable Bot Manager on your property
-2. Configure bot detection policies (e.g., block known bad bots)
-3. Set up conditional actions based on bot score
-4. Pass bot detection headers to origin/EdgeWorkers
-
-**Step 2: Forward Bot Manager Headers to WASM Bot Trap**
-
-Bot Manager can pass detection results via headers. Configure your property to forward:
-
-```
-Akamai-Bot-Score: 85
-Akamai-Bot-Category: AUTOMATED_TOOL
-Akamai-Bot-Action: MONITOR
-```
-
-**Step 3: Use Bot Manager Data in WASM Bot Trap (Future Enhancement)**
-
-The WASM bot trap can be extended to read these headers and make decisions:
-
-```rust
-// Example: Trust Bot Manager's high-confidence detections
-fn check_bot_manager_headers(req: &Request) -> Option<BotManagerResult> {
-    let score = req.header("Akamai-Bot-Score")?.parse::<u8>().ok()?;
-    let category = req.header("Akamai-Bot-Category")?;
-    
-    if score > 90 && category == "MALICIOUS_BOT" {
-        return Some(BotManagerResult::Block);
-    }
-    None
-}
-```
-
-#### When NOT to Integrate
-
-You may choose to run them independently if:
-- You want the WASM bot trap to catch what Bot Manager misses (no header sharing)
-- Bot Manager is configured in monitor-only mode for analytics
-- You're using different Akamai properties for different protection layers
-- Your application has unique requirements that don't fit Bot Manager's model
-
-#### Migration Path
-
-If you're currently using only Bot Manager and want to add custom protections:
-1. Deploy WASM bot trap in **test mode** (`TEST_MODE=1`) behind Bot Manager
-2. Monitor logs to see what additional traffic would be blocked
-3. Tune honeypot URLs and rate limits based on your application
-4. Gradually enable blocking for specific rules
-5. Use Bot Manager for broad protection, WASM bot trap for surgical precision
+> **📖 Bot Manager Integration**: See the [comprehensive feature comparison](#comprehensive-feature-comparison) in the Primary Deployment section for detailed guidance on integrating with Akamai Bot Manager, including architecture diagrams, configuration steps, and when to use each solution.
 
 ### Linode (Akamai Cloud Computing)
 
