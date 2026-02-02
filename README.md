@@ -1,13 +1,13 @@
 # WASM Stealth Bot Trap (Fermyon Spin)
 
-This project implements a customizable, behavior-based bot defense system designed for **Akamai's Fermyon platform**, running WebAssembly at the edge for ultra-low latency bot protection.
+This project implements a customizable, behavior-based bot defense system designed for **Fermyon Spin**, running WebAssembly at the edge for ultra-low latency bot protection.
 
-## 🚀 Primary Platform: Akamai Fermyon (Edge WASM)
+## 🚀 Primary Platform: Fermyon Cloud (Edge WASM)
 
-This bot trap is **primarily built and tested for deployment on Akamai's Fermyon edge compute platform**. Fermyon Spin enables serverless WebAssembly execution at the edge, providing:
+This bot trap is **primarily built and tested for deployment on Fermyon Cloud**. Fermyon Spin enables serverless WebAssembly execution at the edge, providing:
 
 - **Ultra-low latency**: WASM executes in microseconds at edge locations worldwide
-- **Global distribution**: Automatic deployment to Akamai's edge network
+- **Global distribution**: Automatic deployment across Fermyon's edge network
 - **Serverless scale**: No infrastructure management, automatic scaling
 - **Integrated KV storage**: Edge key-value store for ban lists, rate limits, and configuration
 
@@ -57,9 +57,9 @@ See [DASHBOARD.md](DASHBOARD.md) for complete dashboard documentation.
 
 ---
 
-## 🎯 Production Deployment: Akamai Fermyon Cloud
+## 🎯 Primary Deployment: Fermyon Cloud
 
-### Deploy to Akamai Fermyon
+### Deploy to Fermyon Cloud
 
 **Step 1: Build for Production**
 ```sh
@@ -95,21 +95,21 @@ spin cloud deploy
 spin cloud link --domain your-domain.example.com
 ```
 
-### Akamai Edge Integration
+### Fermyon Cloud Integration
 
-When deployed on Akamai's Fermyon platform, the bot trap automatically benefits from:
+When deployed on Fermyon Cloud, the bot trap automatically benefits from:
 
-1. **Edge Execution**: WASM runs at the nearest Akamai edge location
+1. **Edge Execution**: WASM runs at the nearest edge location
 2. **Global KV Store**: Ban lists and configuration sync across all edge locations
-3. **X-Forwarded-For Header**: Akamai's edge automatically sets proper client IP headers
+3. **X-Forwarded-For Header**: Edge automatically sets proper client IP headers
 4. **Edge Caching**: Static dashboard assets can be cached at the edge
 
 **Architecture:**
 ```
-Internet → Akamai Edge → Fermyon Spin App (WASM)
-                         ↓
-                    Edge KV Store
-                    (bans, config, rate limits)
+Internet → Fermyon Edge → Spin App (WASM)
+                          ↓
+                     Edge KV Store
+                     (bans, config, rate limits)
 ```
 
 ### Monitoring Production Deployment
@@ -127,41 +127,121 @@ spin cloud apps metrics
 
 ---
 
-## Alternative Deployments: CDN/Reverse Proxy Integration
+## 🔷 Secondary Deployment: Akamai Edge & Linode
 
-While **Akamai Fermyon is the primary deployment target**, the bot trap can also work behind other CDN/proxy configurations for existing infrastructure.
+For organizations already using Akamai or Linode infrastructure, the bot trap can be deployed directly on these platforms.
+
+### Akamai EdgeWorkers / Compute@Edge
+
+Deploy the Spin application on Akamai's edge compute infrastructure:
+
+**Architecture:**
+```
+Internet → Akamai Edge (CDN) → EdgeWorkers/Compute@Edge (WASM)
+                               ↓
+                          Edge KV Store
+```
+
+**Setup Steps:**
+1. Build the WASM binary: `make prod`
+2. Package for Akamai EdgeWorkers deployment
+3. Configure EdgeWorkers to serve the Spin application
+4. Set up Akamai's EdgeKV for persistent storage
+5. Configure property rules to route traffic through EdgeWorkers
+
+**Benefits:**
+- Native integration with Akamai CDN and security features
+- Access to Akamai's threat intelligence and IP reputation
+- Seamless integration with existing Akamai properties
+- Global edge network with 4,000+ points of presence
+
+### Linode (Akamai Cloud Computing)
+
+Deploy on Linode compute instances with Spin installed:
+
+**Architecture:**
+```
+Internet → Linode NodeBalancer → Linode Instance(s) (Spin)
+                                 ↓
+                            Redis/KV Store
+```
+
+**Setup Steps:**
+1. Create a Linode instance (recommend Dedicated CPU for production)
+2. Install Spin runtime: `curl -fsSL https://developer.fermyon.com/downloads/install.sh | bash`
+3. Deploy the bot trap: `spin up --listen 0.0.0.0:3000`
+4. Configure NodeBalancer for load balancing and SSL termination
+5. Set up Redis or Linode Object Storage for persistent KV storage
+
+**Benefits:**
+- Full control over infrastructure and scaling
+- Cost-effective for high-traffic deployments
+- Easy integration with Linode's other services (Object Storage, Managed Databases)
+- Akamai CDN can be added in front for additional edge caching
+
+**Example Linode Deployment Script:**
+```sh
+#!/bin/bash
+# On your Linode instance
+cd /opt/wasm-bot-trap
+git pull origin main
+make prod
+systemctl restart spin-bot-trap
+```
+
+---
+
+## 🔶 Tertiary Deployment: Cloudflare & AWS
+
+For organizations using Cloudflare or AWS, the bot trap can be integrated into existing infrastructure.
 
 ### ⚠️ Important: Infrastructure-Level Protection Required
 
-When deploying outside Akamai Fermyon, the bot trap **must** be deployed behind a CDN or reverse proxy that sets the `X-Forwarded-For` header. This is critical for proper IP detection and security.
+When self-hosting, the bot trap **must** be deployed behind a CDN or reverse proxy that sets the `X-Forwarded-For` header. This is critical for proper IP detection and security.
 
 **Required Setup:**
-- **CDN/Reverse Proxy**: Cloudflare, AWS CloudFront, Fastly, or similar
+- **CDN/Reverse Proxy**: Cloudflare, AWS CloudFront, or similar
 - **Origin Protection**: Configure your CDN to set proper headers and prevent direct access to origin
-- **Firewall Rules**: Use infrastructure firewall (AWS Security Groups, Cloudflare Firewall, etc.) to:
+- **Firewall Rules**: Use infrastructure firewall to:
   - Block direct access to origin server from public internet
   - Allow ONLY CDN/proxy IPs to reach origin
-  - Restrict `/health` endpoint to monitoring services only (if needed)
+  - Restrict `/health` endpoint to monitoring services only
 
-**Why This Matters:**
-- Without a reverse proxy, client IPs will be detected as "unknown"
-- The bot trap is designed to work with `X-Forwarded-For` header for accurate IP detection
-- Direct origin access bypasses CDN protection and may allow attackers to hide their real IP
-- The `/health` endpoint allows "unknown" IPs for local development convenience, but in production should be restricted at infrastructure level
+### Cloudflare Setup
 
-### Alternative: Cloudflare Setup
+**Architecture:**
 ```
 Internet → Cloudflare CDN → Your Spin App (self-hosted)
           (Sets X-Forwarded-For)
 ```
 
-### Alternative: AWS Setup
+**Setup Steps:**
+1. Self-host Spin on your own infrastructure (VM, container, etc.)
+2. Add your domain to Cloudflare
+3. Configure Cloudflare to proxy traffic to your origin
+4. Enable "Authenticated Origin Pulls" to secure origin
+5. Set up Cloudflare Firewall rules to restrict admin endpoints
+
+### AWS Setup
+
+**Architecture:**
 ```
-Internet → CloudFront → ALB/API Gateway → Your Spin App (self-hosted)
+Internet → CloudFront → ALB/API Gateway → Your Spin App (EC2/ECS/Lambda)
           (Sets X-Forwarded-For)
 ```
 
-**Note:** These setups require self-hosting the Spin application. For fully managed deployment, use Akamai Fermyon Cloud.
+**Setup Steps:**
+1. Deploy Spin app on EC2, ECS, or package as Lambda (with adapter)
+2. Configure ALB or API Gateway as the entry point
+3. Set up CloudFront distribution pointing to ALB/API Gateway
+4. Configure Security Groups to allow only CloudFront IPs
+5. Use AWS WAF for additional protection layer
+
+**Note:** These setups require self-hosting and managing the Spin application. For fully managed deployment, use Fermyon Cloud.
+
+---
+
+## 🔒 Security Best Practices (All Deployments)
 
 **Health Endpoint Security:**
 The `/health` endpoint is accessible to IPs detected as "unknown" to support local development. In production:
@@ -175,6 +255,11 @@ The `/health` endpoint is accessible to IPs detected as "unknown" to support loc
 - Restrict `/admin/*` endpoints via CDN rules to admin IPs only
 - Use HTTPS in production (handled by CDN/Fermyon Cloud)
 - Consider adding additional authentication layers (OAuth, JWT, etc.)
+
+**Why X-Forwarded-For Matters:**
+- Without a reverse proxy, client IPs will be detected as "unknown"
+- The bot trap is designed to work with `X-Forwarded-For` header for accurate IP detection
+- Direct origin access bypasses CDN protection and may allow attackers to hide their real IP
 
 ---
 
