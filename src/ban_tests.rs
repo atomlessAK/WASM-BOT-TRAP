@@ -4,7 +4,6 @@
 #[cfg(test)]
 mod tests {
     use super::super::ban::*;
-    use super::super::ban::BanEntry;
     use std::collections::HashMap;
     use crate::quiz::KeyValueStore;
 
@@ -45,10 +44,35 @@ mod tests {
         // Ban 'unknown' IP
         ban_ip(&store, site_id, ip, "test", 60);
         assert!(is_banned(&store, site_id, ip));
-        // Unban 'unknown' IP (simulate admin unban)
-        let key = format!("ban:{}:{}", site_id, ip);
-        store.delete(&key).unwrap();
+        // Unban using the unban_ip function
+        unban_ip(&store, site_id, ip);
         assert!(!is_banned(&store, site_id, ip));
+    }
+
+    #[test]
+    fn test_unban_ip_function() {
+        let store = TestStore::default();
+        let site_id = "testsite";
+        let ip = "192.168.1.100";
+        
+        // Ban an IP
+        ban_ip(&store, site_id, ip, "test_reason", 3600);
+        assert!(is_banned(&store, site_id, ip), "IP should be banned after ban_ip");
+        
+        // Unban using unban_ip function
+        unban_ip(&store, site_id, ip);
+        assert!(!is_banned(&store, site_id, ip), "IP should not be banned after unban_ip");
+    }
+
+    #[test]
+    fn test_unban_ip_nonexistent() {
+        let store = TestStore::default();
+        let site_id = "testsite";
+        let ip = "10.0.0.1";
+        
+        // Unban a non-existent IP should not panic
+        unban_ip(&store, site_id, ip);
+        assert!(!is_banned(&store, site_id, ip), "Non-existent IP should not be banned");
     }
 
     #[test]

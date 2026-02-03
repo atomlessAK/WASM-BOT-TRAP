@@ -13,6 +13,12 @@ pub struct BanDurations {
     pub rate_limit: u64,    // Exceeding rate limits
     pub browser: u64,       // Outdated/suspicious browser
     pub admin: u64,         // Manual admin ban (default)
+    #[serde(default = "default_cdp_ban_duration")]
+    pub cdp: u64,           // CDP automation detection
+}
+
+fn default_cdp_ban_duration() -> u64 {
+    43200  // 12 hours for CDP automation
 }
 
 impl Default for BanDurations {
@@ -22,6 +28,7 @@ impl Default for BanDurations {
             rate_limit: 3600,   // 1 hour - temporary
             browser: 21600,     // 6 hours - moderate
             admin: 21600,       // 6 hours - default for manual bans
+            cdp: 43200,         // 12 hours - automation detected
         }
     }
 }
@@ -33,6 +40,7 @@ impl BanDurations {
             "honeypot" => self.honeypot,
             "rate" | "rate_limit" => self.rate_limit,
             "browser" => self.browser,
+            "cdp" | "cdp_automation" => self.cdp,
             _ => self.admin,
         }
     }

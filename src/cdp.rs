@@ -12,6 +12,69 @@
 // - https://rebrowser.net/blog/how-to-fix-runtime-enable-cdp-detection-of-puppeteer-playwright-and-other-automation-libraries
 // - https://kaliiiiiiiiii.github.io/brotector/
 
+use spin_sdk::http::{Request, Response};
+use spin_sdk::key_value::Store;
+use serde::{Deserialize, Serialize};
+
+/// CDP detection report from client-side JavaScript
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CdpReport {
+    pub cdp_detected: bool,
+    pub score: f32,
+    pub checks: Vec<String>,
+}
+
+/// Handles incoming CDP detection reports from client-side JavaScript.
+/// When automation is detected above the configured threshold, the IP may be auto-banned.
+pub fn handle_cdp_report(store: &Store, req: &Request) -> Response {
+    let ip = crate::extract_client_ip(req);
+    let cfg = crate::config::Config::load(store, "default");
+    
+    // Only process if CDP detection is enabled
+    if !cfg.cdp_detection_enabled {
+        return Response::new(200, "CDP detection disabled");
+    }
+    
+    // Parse the report body
+    let body = req.body();
+    let report: CdpReport = match serde_json::from_slice(body) {
+        Ok(r) => r,
+        Err(_) => return Response::new(400, "Invalid CDP report format"),
+    };
+    
+    // Log the CDP detection event
+    crate::admin::log_event(store, &crate::admin::EventLogEntry {
+        ts: crate::admin::now_ts(),
+        event: crate::admin::EventType::Challenge,
+        ip: Some(ip.clone()),
+        reason: Some(format!("cdp_detected:score={:.2}", report.score)),
+        outcome: Some(format!("checks:{}", report.checks.join(","))),
+        admin: None,
+    });
+    
+    // Increment metrics
+    crate::metrics::increment(store, crate::metrics::MetricName::CdpDetections, None);
+    
+    // Auto-ban if score exceeds threshold and auto-ban is enabled
+    if cfg.cdp_auto_ban && report.score >= cfg.cdp_detection_threshold {
+        crate::ban::ban_ip(store, "default", &ip, "cdp_automation", cfg.get_ban_duration("cdp"));
+        crate::metrics::increment(store, crate::metrics::MetricName::BansTotal, Some("cdp_automation"));
+        
+        crate::admin::log_event(store, &crate::admin::EventLogEntry {
+            ts: crate::admin::now_ts(),
+            event: crate::admin::EventType::Ban,
+            ip: Some(ip.clone()),
+            reason: Some("cdp_automation".to_string()),
+            outcome: Some(format!("banned:score={:.2}", report.score)),
+            admin: None,
+        });
+        
+        return Response::new(200, "Automation detected - banned");
+    }
+    
+    Response::new(200, "Report received")
+}
+
 /// JavaScript code that detects CDP automation
 /// This script checks for the Runtime.Enable CDP leak which affects all major
 /// automation libraries (Puppeteer, Playwright, Selenium)
@@ -243,7 +306,9 @@ pub fn get_cdp_detection_script() -> &'static str {
     CDP_DETECTION_JS
 }
 
-/// JavaScript snippet to report CDP detection result back to the server
+/// JavaScript snippet to report CDP detection result back to the server.
+/// Used by inject_cdp_detection() and available for custom injection scenarios.
+#[allow(dead_code)]
 pub fn get_cdp_report_script(report_endpoint: &str) -> String {
     format!(r#"
 <script>
@@ -267,7 +332,10 @@ pub fn get_cdp_report_script(report_endpoint: &str) -> String {
 "#, report_endpoint)
 }
 
-/// Injects CDP detection into an HTML page
+/// Injects CDP detection into an HTML page.
+/// Useful for injecting detection into external HTML content (e.g., proxy scenarios).
+/// Currently used by tests; main integration uses get_cdp_detection_script() directly.
+#[allow(dead_code)]
 pub fn inject_cdp_detection(html: &str, report_endpoint: Option<&str>) -> String {
     let detection_script = format!("<script>{}</script>", CDP_DETECTION_JS);
     

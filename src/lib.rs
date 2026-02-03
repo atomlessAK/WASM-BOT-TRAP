@@ -7,6 +7,8 @@ mod ban_tests;
 mod whitelist_tests;
 #[cfg(test)]
 mod whitelist_path_tests;
+#[cfg(test)]
+mod cdp_tests;
 mod auth;
 // src/lib.rs
 // Entry point for the WASM Stealth Bot Trap Spin app
@@ -93,6 +95,14 @@ pub fn handle_bot_trap_impl(req: &Request) -> Response {
     if path == "/quiz" && *req.method() == spin_sdk::http::Method::Post {
         if let Ok(store) = Store::open_default() {
             return quiz::handle_quiz_submit(&store, req);
+        }
+        return Response::new(500, "Key-value store error");
+    }
+
+    // CDP Report endpoint - receives automation detection reports from client-side JS
+    if path == "/cdp-report" && *req.method() == spin_sdk::http::Method::Post {
+        if let Ok(store) = Store::open_default() {
+            return cdp::handle_cdp_report(&store, req);
         }
         return Response::new(500, "Key-value store error");
     }

@@ -16,6 +16,7 @@ pub enum MetricName {
     WhitelistedTotal,
     TestModeActions,
     MazeHits,
+    CdpDetections,
 }
 
 impl MetricName {
@@ -28,6 +29,7 @@ impl MetricName {
             MetricName::WhitelistedTotal => "whitelisted_total",
             MetricName::TestModeActions => "test_mode_actions_total",
             MetricName::MazeHits => "maze_hits_total",
+            MetricName::CdpDetections => "cdp_detections_total",
         }
     }
 }

@@ -189,8 +189,8 @@ pub fn handle_admin(req: &Request) -> Response {
             if ip.is_empty() {
                 return Response::new(400, "Missing ip param");
             }
-            let key = format!("ban:{}:{}", site_id, ip);
-            let _ = store.delete(&key);
+            // Use the ban module's unban_ip function for consistency
+            crate::ban::unban_ip(&store, site_id, ip);
             // Log unban event
             log_event(&store, &EventLogEntry {
                 ts: now_ts(),
