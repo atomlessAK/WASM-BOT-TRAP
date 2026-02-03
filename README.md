@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <img src="/dashboard/assets/shuma-gorath.png" alt="Shuma-Gorath" width="300">
+  <img src="dashboard/assets/shuma-gorath.png" alt="Shuma-Gorath" width="300">
 </p>
 
 # Shuma-Gorath (Many-Angled Bot Defence)
