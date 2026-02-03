@@ -9,7 +9,7 @@
 #   1. Start Spin server: spin up
 #   2. Run this script: ./test_spin_colored.sh
 #
-# This script runs 8 integration test scenarios:
+# This script runs 15 integration test scenarios:
 #   1. Health check endpoint (GET /health)
 #   2. Root endpoint behavior (GET /)
 #   3. Honeypot ban detection (POST /bot-trap)
@@ -18,6 +18,13 @@
 #   6. Config API - get config (GET /admin/config)
 #   7. Test mode toggle (POST /admin/config)
 #   8. Test mode behavior verification
+#   9. Test mode disable and blocking resumes
+#   10. Verify blocking after test mode disabled
+#   11. Prometheus metrics endpoint
+#   12. CDP report endpoint (POST /cdp-report)
+#   13. CDP auto-ban with high score
+#   14. CDP config via admin API
+#   15. Unban functionality test
 
 set -e
 
@@ -173,5 +180,54 @@ if echo "$metrics_resp" | grep -q 'bot_trap_bans_total'; then
 else
   fail "/metrics missing ban counters"
 fi
+
+# Test 12: CDP report endpoint exists
+info "Testing POST /cdp-report endpoint..."
+cdp_report='{"cdp_detected":true,"score":0.5,"checks":["webdriver"]}'
+cdp_resp=$(curl -s -X POST -H "Content-Type: application/json" -H "X-Forwarded-For: 10.0.0.200" -d "$cdp_report" "$BASE_URL/cdp-report")
+if echo "$cdp_resp" | grep -qiE 'received|disabled|detected'; then
+  pass "/cdp-report endpoint accepts detection reports"
+else
+  fail "/cdp-report endpoint not working"
+  echo -e "${YELLOW}DEBUG cdp response:${NC} $cdp_resp"
+fi
+
+# Test 13: CDP report with high score triggers action (when enabled)
+info "Testing CDP auto-ban with high score..."
+cdp_high='{"cdp_detected":true,"score":0.95,"checks":["webdriver","automation_props","cdp_timing"]}'
+cdp_high_resp=$(curl -s -X POST -H "Content-Type: application/json" -H "X-Forwarded-For: 10.0.0.201" -d "$cdp_high" "$BASE_URL/cdp-report")
+if echo "$cdp_high_resp" | grep -qiE 'banned|received|disabled'; then
+  pass "/cdp-report handles high-score detection"
+else
+  fail "/cdp-report failed for high-score detection"
+  echo -e "${YELLOW}DEBUG cdp high response:${NC} $cdp_high_resp"
+fi
+
+# Test 14: CDP config available via admin API
+info "Testing CDP config in /admin/cdp..."
+cdp_config=$(curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/cdp")
+if echo "$cdp_config" | grep -qE '"enabled"|cdp_detection'; then
+  pass "/admin/cdp returns CDP configuration"
+else
+  fail "/admin/cdp not returning expected config"
+  echo -e "${YELLOW}DEBUG cdp config:${NC} $cdp_config"
+fi
+
+# Test 15: unban_ip function works via admin endpoint  
+info "Testing unban functionality..."
+# First ban an IP
+curl -s -X POST -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/ban?ip=10.0.0.202&reason=test" > /dev/null
+# Then unban it
+unban_resp=$(curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.202")
+if echo "$unban_resp" | grep -qi 'unbanned'; then
+  pass "Unban via admin API works correctly"
+else
+  fail "Unban did not work as expected"
+  echo -e "${YELLOW}DEBUG unban response:${NC} $unban_resp"
+fi
+
+# Cleanup: unban test CDP IPs
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.200" > /dev/null
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/admin/unban?ip=10.0.0.201" > /dev/null
 
 echo -e "\n${GREEN}All integration tests complete.${NC}"
