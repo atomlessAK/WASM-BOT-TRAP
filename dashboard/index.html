@@ -7,6 +7,7 @@
   <title>Shuma-Gorath Dashboard</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-colorschemes@0.5.0/dist/chartjs-plugin-colorschemes.min.js"></script>
 </head>
 
 <body>
@@ -17,15 +18,13 @@
       </div>
       <h1>Shuma-Gorath</h1>
       <p class="subtitle">Many-Angled Bot Defence</p>
-      <div id="test-mode-banner" class="test-mode-banner hidden">
-        ⚠️ TEST MODE ACTIVE - Logging only, no blocking
-      </div>
+      <div id="test-mode-banner" class="test-mode-banner hidden">TEST MODE ACTIVE - Logging only, no blocking</div>
     </header>
 
     <div class="config">
       <label>API Endpoint: <input id="endpoint" value="http://127.0.0.1:3000" size="30"></label>
       <label>API Key: <input id="apikey" value="changeme-supersecret" size="30" type="password"></label>
-      <button id="refresh">🔄 Refresh</button>
+      <button id="refresh">Refresh</button>
       <span id="last-updated"></span>
     </div>
 
@@ -64,7 +63,7 @@
     <!-- Events Over Time -->
     <div class="section">
       <div class="chart-header">
-        <h2>📊 Events Over Time</h2>
+        <h2>Events Over Time</h2>
         <div class="time-range-buttons">
           <button class="time-btn active" data-range="hour">60 Mins</button>
           <button class="time-btn" data-range="day">24 Hours</button>
@@ -79,7 +78,7 @@
 
     <!-- Ban List -->
     <div class="section">
-      <h2>📋 Current Bans</h2>
+      <h2>Current Bans</h2>
       <table id="bans-table">
         <thead>
           <tr>
@@ -127,8 +126,8 @@
         <div class="control-group">
           <h3>Test Mode</h3>
           <p class="control-desc">When enabled, logs actions without blocking users</p>
-          <label class="toggle-switch">
-            <input type="checkbox" id="test-mode-toggle">
+          <label class="toggle-switch" for="test-mode-toggle">
+            <input type="checkbox" id="test-mode-toggle" aria-label="Enable Test Mode">
             <span class="toggle-slider"></span>
           </label>
           <span id="test-mode-status">Loading...</span>
@@ -137,93 +136,93 @@
           <h3>Ban Durations</h3>
           <p class="control-desc">Configure ban duration per offense type (seconds)</p>
           <div class="duration-grid">
-            <label>Honeypot: <input id="dur-honeypot" type="number" value="86400" /></label>
-            <label>Rate Limit: <input id="dur-rate-limit" type="number" value="3600" /></label>
-            <label>Browser: <input id="dur-browser" type="number" value="21600" /></label>
-            <label>Admin: <input id="dur-admin" type="number" value="21600" /></label>
+            <label for="dur-honeypot">Honeypot:</label> <input id="dur-honeypot" type="number" value="86400" />
+            <label for="dur-rate-limit">Rate Limit:</label> <input id="dur-rate-limit" type="number" value="3600" />
+            <label for="dur-browser">Browser:</label> <input id="dur-browser" type="number" value="21600" />
+            <label for="dur-admin">Admin:</label> <input id="dur-admin" type="number" value="21600" />
           </div>
           <button id="save-durations-btn">💾 Save Durations</button>
         </div>
         <div class="control-group">
           <h3>Ban IP</h3>
-          <input id="ban-ip" type="text" placeholder="IP address" />
-          <input id="ban-reason" type="text" placeholder="Reason (optional)" value="manual_ban" />
-          <input id="ban-duration" type="number" placeholder="Duration (seconds)" value="3600" />
-          <button id="ban-btn">🚫 Ban</button>
+          <input id="ban-ip" type="text" placeholder="IP address" aria-label="IP address to ban" />
+          <input id="ban-reason" type="text" placeholder="Reason (optional)" value="manual_ban" aria-label="Ban reason" />
+          <input id="ban-duration" type="number" placeholder="Duration (seconds)" value="3600" aria-label="Ban duration in seconds" />
+          <button id="ban-btn">Ban</button>
         </div>
         <div class="control-group">
           <h3>Unban IP</h3>
-          <input id="unban-ip" type="text" placeholder="IP address" />
-          <button id="unban-btn">✅ Unban</button>
+          <input id="unban-ip" type="text" placeholder="IP address" aria-label="IP address to unban" />
+          <button id="unban-btn">Unban</button>
         </div>
         <div class="control-group">
           <h3>🕸️ Link Maze</h3>
           <p class="control-desc">Honeypot trap for crawlers</p>
           <div class="admin-controls">
             <div class="toggle-row">
-              <label class="control-label">Maze Enabled</label>
+              <label class="control-label" for="maze-enabled-toggle">Maze Enabled</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="maze-enabled-toggle" checked>
+                <input type="checkbox" id="maze-enabled-toggle" checked aria-label="Enable maze honeypot">
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="toggle-row">
-              <label class="control-label">Auto-Ban</label>
+              <label class="control-label" for="maze-auto-ban-toggle">Auto-Ban</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="maze-auto-ban-toggle" checked>
+                <input type="checkbox" id="maze-auto-ban-toggle" checked aria-label="Enable maze auto-ban">
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="input-row">
-              <label class="control-label">Ban Threshold</label>
-              <input type="number" id="maze-threshold" value="50" min="5" max="500">
+              <label class="control-label" for="maze-threshold">Ban Threshold</label>
+              <input type="number" id="maze-threshold" value="50" min="5" max="500" aria-label="Maze ban threshold in pages">
               <span class="input-unit">pages</span>
             </div>
           </div>
-          <button id="save-maze-config">💾 Save Maze Settings</button>
+          <button id="save-maze-config">Save Maze Settings</button>
         </div>
         <div class="control-group">
-          <h3>📜 AI Training Opt-Out Policy</h3>
+          <h3>AI Training Opt-Out Policy</h3>
           <p class="control-desc">Declare crawling policies via robots.txt (advisory, not enforcement)</p>
           <div class="admin-controls">
             <div class="toggle-row">
-              <label class="control-label control-label--wide">Serve robots.txt</label>
+              <label class="control-label control-label--wide" for="robots-enabled-toggle">Serve robots.txt</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="robots-enabled-toggle" checked>
+                <input type="checkbox" id="robots-enabled-toggle" checked aria-label="Serve robots.txt">
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="toggle-row">
-              <label class="control-label control-label--wide">Opt-out AI Training</label>
+              <label class="control-label control-label--wide" for="robots-block-training-toggle">Opt-out AI Training</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="robots-block-training-toggle" checked>
+                <input type="checkbox" id="robots-block-training-toggle" checked aria-label="Opt-out AI training">
                 <span class="toggle-slider"></span>
               </label>
               <span class="toggle-hint">GPTBot, CCBot, ClaudeBot</span>
             </div>
             <div class="toggle-row">
-              <label class="control-label control-label--wide">Opt-out AI Search</label>
+              <label class="control-label control-label--wide" for="robots-block-search-toggle">Opt-out AI Search</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="robots-block-search-toggle">
+                <input type="checkbox" id="robots-block-search-toggle" aria-label="Opt-out AI search">
                 <span class="toggle-slider"></span>
               </label>
               <span class="toggle-hint">PerplexityBot, etc.</span>
             </div>
             <div class="toggle-row">
-              <label class="control-label control-label--wide">Restrict Search Engines</label>
+              <label class="control-label control-label--wide" for="robots-allow-search-toggle">Restrict Search Engines</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="robots-allow-search-toggle">
+                <input type="checkbox" id="robots-allow-search-toggle" aria-label="Restrict search engines">
                 <span class="toggle-slider"></span>
               </label>
               <span class="toggle-hint">Google, Bing, etc.</span>
             </div>
             <div class="input-row">
-              <label class="control-label control-label--wide">Crawl Delay</label>
-              <input type="number" id="robots-crawl-delay" value="2" min="0" max="60">
+              <label class="control-label control-label--wide" for="robots-crawl-delay">Crawl Delay</label>
+              <input type="number" id="robots-crawl-delay" value="2" min="0" max="60" aria-label="Robots crawl delay in seconds">
               <span class="input-unit">seconds</span>
             </div>
           </div>
-          <button id="save-robots-config" disabled>📝 Update Policy</button>
+          <button id="save-robots-config" disabled>Update Policy</button>
           <button id="preview-robots">👁️ Show robots.txt</button>
           <div id="robots-preview" class="robots-preview hidden">
             <h4>robots.txt Preview</h4>
@@ -236,32 +235,32 @@
             Selenium, etc.)</p>
           <div class="admin-controls">
             <div class="toggle-row">
-              <label class="control-label control-label--wide">Enable Detection</label>
+              <label class="control-label control-label--wide" for="cdp-enabled-toggle">Enable Detection</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="cdp-enabled-toggle" checked>
+                <input type="checkbox" id="cdp-enabled-toggle" checked aria-label="Enable CDP detection">
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="toggle-row">
-              <label class="control-label control-label--wide">Auto-ban on Detection</label>
+              <label class="control-label control-label--wide" for="cdp-auto-ban-toggle">Auto-ban on Detection</label>
               <label class="toggle-switch">
-                <input type="checkbox" id="cdp-auto-ban-toggle" checked>
+                <input type="checkbox" id="cdp-auto-ban-toggle" checked aria-label="Enable CDP auto-ban">
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="slider-control">
               <div class="slider-header">
-                <label class="control-label control-label--wide">Detection Threshold</label>
+                <label class="control-label control-label--wide" for="cdp-threshold-slider">Detection Threshold</label>
                 <span id="cdp-threshold-value" class="slider-badge">0.6</span>
               </div>
-              <input type="range" id="cdp-threshold-slider" min="0.3" max="1.0" step="0.1" value="0.6">
+              <input type="range" id="cdp-threshold-slider" min="0.3" max="1.0" step="0.1" value="0.6" aria-label="CDP detection threshold">
               <div class="slider-labels">
                 <span>Sensitive</span>
                 <span>Strict</span>
               </div>
             </div>
           </div>
-          <button id="save-cdp-config" disabled>💾 Save CDP Settings</button>
+          <button id="save-cdp-config" disabled>Save CDP Settings</button>
           <div id="cdp-stats" class="info-panel">
             <h4>Detection Stats</h4>
             <div class="info-row">
@@ -280,7 +279,7 @@
 
     <!-- Recent Events -->
     <div class="section events">
-      <h2>📊 Recent Events (Last 100)</h2>
+      <h2>Recent Events (Last 100)</h2>
       <div class="table-wrapper">
         <table id="events">
           <thead>
