@@ -615,7 +615,7 @@ function updateCdpConfig(config) {
   }
   if (config.cdp_detection_threshold !== undefined) {
     document.getElementById('cdp-threshold-slider').value = config.cdp_detection_threshold;
-    document.getElementById('cdp-threshold-value').textContent = config.cdp_detection_threshold;
+     document.getElementById('cdp-threshold-value').textContent = parseFloat(config.cdp_detection_threshold).toFixed(1);
   }
   // Store saved state for change detection
   cdpSavedState = {
@@ -648,7 +648,8 @@ function checkCdpConfigChanged() {
 // Update threshold display when slider moves
 document.getElementById('cdp-threshold-slider').addEventListener('input', function() {
   document.getElementById('cdp-threshold-value').textContent = this.value;
-  checkCdpConfigChanged();
+    document.getElementById('cdp-threshold-value').textContent = parseFloat(this.value).toFixed(1);
+    checkCdpConfigChanged();
 });
 
 // Add change listeners for CDP config controls
