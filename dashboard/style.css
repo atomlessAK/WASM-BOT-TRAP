@@ -742,6 +742,10 @@ input:checked + .toggle-slider:before {
   color: #374151;
 }
 
+.maze-admin-label.robots-label-wide {
+  min-width: 150px;
+}
+
 .maze-threshold-row input {
   width: 80px;
   padding: 8px 10px;
