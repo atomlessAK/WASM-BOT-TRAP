@@ -4,7 +4,7 @@
   <img src="dashboard/assets/shuma-gorath.png" alt="Shuma-Gorath" width="300">
 </p>
 
-# Shuma-Gorath (Many-Angled Bot Defence)
+# Shuma Gorath (Many-Angled Bot Defence)
 
 A customizable, behavior-based bot defense system designed for **Fermyon Spin**, running WebAssembly at the edge for ultra-low latency bot protection.
 
@@ -12,7 +12,7 @@ A customizable, behavior-based bot defense system designed for **Fermyon Spin**,
 
 
 
-## 📚 Documentation
+## 🐙 Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -26,7 +26,7 @@ A customizable, behavior-based bot defense system designed for **Fermyon Spin**,
 
 ---
 
-## 🚀 Primary Platform: Fermyon Cloud (Edge WASM)
+## 🐙 Primary Platform: Fermyon Cloud (Edge WASM)
 
 Shuma-Gorath is **primarily built and tested for deployment on Fermyon Cloud**. Fermyon Spin enables serverless WebAssembly execution at the edge, providing:
 
@@ -105,29 +105,29 @@ Once running, you can access:
 
 | Endpoint | Description |
 |----------|-------------|
-| http://127.0.0.1:3000/dashboard/index.html | 📊 Monitoring Dashboard |
-| http://127.0.0.1:3000/robots.txt | 🤖 AI Crawler Policy (robots.txt) |
-| http://127.0.0.1:3000/metrics | 📈 Prometheus Metrics |
-| http://127.0.0.1:3000/health | ❤️ Health Check |
-| http://127.0.0.1:3000/admin | 🔧 Admin API Help |
+| http://127.0.0.1:3000/dashboard/index.html | 🐙 Monitoring Dashboard |
+| http://127.0.0.1:3000/robots.txt | 🐙 AI Crawler Policy (robots.txt) |
+| http://127.0.0.1:3000/metrics | 🐙 Prometheus Metrics |
+| http://127.0.0.1:3000/health | 🐙 Health Check |
+| http://127.0.0.1:3000/admin | 🐙 Admin API Help |
 
 ### Dashboard Features
 
 The dashboard provides:
-- 📊 Real-time statistics (total bans, active bans, events, unique IPs)
-- 📈 Visualizations (event types distribution, top IPs)
-- 📋 Ban list with quick unban controls
-- 🛠️ Admin controls (manual ban/unban)
-- 📜 AI Training Opt-Out Policy controls (robots.txt configuration)
-- 🔄 Auto-refresh every 30 seconds
+- 🐙 Real-time statistics (total bans, active bans, events, unique IPs)
+- 🐙 Visualizations (event types distribution, top IPs)
+- 🐙 Ban list with quick unban controls
+- 🐙 Admin controls (manual ban/unban)
+- 🐙 AI Training Opt-Out Policy controls (robots.txt configuration)
+- 🐙 Auto-refresh every 30 seconds
 
 See [DASHBOARD.md](DASHBOARD.md) for complete dashboard documentation.
 
 ---
 
-## 🎯 Primary Deployment: Fermyon Cloud
+## 🐙 Primary Deployment: Fermyon Cloud
 
-### 🛡️ Why Akamai Bot Manager is Essential
+### 🐙 Why Akamai Bot Manager is Essential
 
 Before deploying any bot protection, it's critical to understand that **Akamai Bot Manager should be your first line of defense**. Bot Manager provides enterprise-grade protection that no custom solution can replicate:
 
@@ -154,7 +154,7 @@ Bot Manager excels at broad, ML-based detection. WASM Bot Trap complements this 
 
 > **Defense in Depth**: No single bot detection solution catches 100% of threats. [OWASP's Automated Threats to Web Applications](https://owasp.org/www-project-automated-threats-to-web-applications/) project documents 21 distinct automated threat categories, many requiring application-specific countermeasures. The layered approach (Bot Manager + custom rules) follows security best practices by ensuring that bots evading one detection layer are caught by another.
 
-### 🏆 Unique Competitive Advantages
+### 🐙 Unique Competitive Advantages
 
 WASM Bot Trap offers distinct advantages over other bot protection solutions in the market:
 
@@ -248,23 +248,23 @@ WASM Bot Trap offers distinct advantages over other bot protection solutions in 
 
 **Bot Manager Exclusive Capabilities (WASM Bot Trap Cannot Do):**
 - 🧠 ML/AI-based bot detection trained on global traffic patterns
-- 👆 Behavioral biometrics (mouse movement, typing patterns, touch gestures)
-- 🔍 Advanced device fingerprinting (200+ signals)
-- 📚 Known bot signature database (1,700+ bots, continuously updated)
-- 🌐 Real-time global IP reputation from Akamai's network
-- 🎯 Credential stuffing and account takeover detection
-- 📊 Enterprise reporting and compliance artifacts
-- 🛎️ 24/7 managed support with SLA
+- 🐙 Behavioral biometrics (mouse movement, typing patterns, touch gestures)
+- 🐙 Advanced device fingerprinting (200+ signals)
+- 🐙 Known bot signature database (1,700+ bots, continuously updated)
+- 🐙 Real-time global IP reputation from Akamai's network
+- 🐙 Credential stuffing and account takeover detection
+- 🐙 Enterprise reporting and compliance artifacts
+- 🐙 24/7 managed support with SLA
 
 **WASM Bot Trap Exclusive Capabilities (Adds On Top of Bot Manager):**
-- 🎣 **Custom Honeypots**: Create app-specific trap URLs that only bots would access
-- 🔧 **Full Code Control**: Implement any detection logic in Rust—no policy limitations
-- 🧩 **Application-Aware Rules**: Read session cookies, parse request bodies, implement business logic
-- 🎮 **Custom Challenges**: Build unique challenge flows (math quiz, custom JS, interactive tests)
-- 💰 **Cost Effective**: Open source, no per-request licensing for high-traffic sites
-- 🔓 **Auditable**: Full source code access for security review and customization
-- ⚡ **Rapid Iteration**: Deploy new detection rules in minutes without vendor involvement
-- 🔌 **Integration Freedom**: Connect to any backend, database, or third-party service
+- 🐙 **Custom Honeypots**: Create app-specific trap URLs that only bots would access
+- 🐙 **Full Code Control**: Implement any detection logic in Rust—no policy limitations
+- 🐙 **Application-Aware Rules**: Read session cookies, parse request bodies, implement business logic
+- 🐙 **Custom Challenges**: Build unique challenge flows (math quiz, custom JS, interactive tests)
+- 🐙 **Cost Effective**: Open source, no per-request licensing for high-traffic sites
+- 🐙 **Auditable**: Full source code access for security review and customization
+- 🐙 **Rapid Iteration**: Deploy new detection rules in minutes without vendor involvement
+- 🐙 **Integration Freedom**: Connect to any backend, database, or third-party service
 
 #### Recommended Architecture: Layered Defense
 
@@ -386,7 +386,7 @@ Internet → Akamai Edge (CDN) → EdgeWorkers/Compute@Edge (WASM)
 - Seamless integration with existing Akamai properties
 - Global edge network with 4,000+ points of presence
 
-> **📖 Bot Manager Integration**: See the [comprehensive feature comparison](#comprehensive-feature-comparison) in the Primary Deployment section for detailed guidance on integrating with Akamai Bot Manager, including architecture diagrams, configuration steps, and when to use each solution.
+> **🐙 Bot Manager Integration**: See the [comprehensive feature comparison](#comprehensive-feature-comparison) in the Primary Deployment section for detailed guidance on integrating with Akamai Bot Manager, including architecture diagrams, configuration steps, and when to use each solution.
 
 ### Linode (Akamai Cloud Computing)
 
@@ -424,11 +424,11 @@ systemctl restart shuma-gorath
 
 ---
 
-## 🔶 Tertiary Deployment: Cloudflare & AWS
+## 🐙 Tertiary Deployment: Cloudflare & AWS
 
 For organizations using Cloudflare or AWS, the bot trap can be integrated into existing infrastructure.
 
-### ⚠️ Important: Infrastructure-Level Protection Required
+### 🐙 Important: Infrastructure-Level Protection Required
 
 When self-hosting, the bot trap **must** be deployed behind a CDN or reverse proxy that sets the `X-Forwarded-For` header. This is critical for proper IP detection and security.
 
@@ -474,7 +474,7 @@ Internet → CloudFront → ALB/API Gateway → Your Spin App (EC2/ECS/Lambda)
 
 ---
 
-## 🔒 Security Best Practices (All Deployments)
+## 🐙 Security Best Practices (All Deployments)
 
 **Health Endpoint Security:**
 The `/health` endpoint is accessible to IPs detected as "unknown" to support local development. In production:
@@ -985,7 +985,7 @@ curl -X POST -H "Authorization: Bearer YOUR_API_KEY" \
 
 ## Testing
 
-**⚠️ Three Test Layers for Complete Coverage**
+**🐙 Three Test Layers for Complete Coverage**
 
 This project uses three distinct test environments, each optimized for its purpose:
 
@@ -1069,7 +1069,7 @@ make test                # Same as above
   - Real HTTP headers (cookies, user-agent, x-forwarded-for)
   - Authentication and API endpoints
 
-**⚠️ Important:** The `tests/bot_trap.rs` file exists only to prevent cargo warnings. It does NOT contain real integration tests. All integration tests are in `test_spin_colored.sh`.
+**🐙 Important:** The `tests/bot_trap.rs` file exists only to prevent cargo warnings. It does NOT contain real integration tests. All integration tests are in `test_spin_colored.sh`.
 
 ### Build System Notes
 
@@ -1084,7 +1084,7 @@ If you see errors about missing crates or WASM output, ensure you are using the 
 
 ### Manual Testing: Replicating Integration Tests in Browser
 
-**⚠️ IMPORTANT: IP Detection When Testing Locally**
+**🐙 IMPORTANT: IP Detection When Testing Locally**
 
 When accessing the bot trap from your local browser or curl without headers, your IP is detected as **"unknown"** (because there's no X-Forwarded-For header). This means:
 - If you get banned, you need to unban IP: **"unknown"**
@@ -1359,7 +1359,7 @@ src/
 
 ## Roadmap
 
-### ✅ Recently Completed
+### 🐙 Recently Completed
 - **Link Maze Honeypot**: Infinite trap pages that exhaust crawler resources (`/trap/*`, `/maze/*`)
 - **Prometheus/OpenTelemetry Metrics**: `/metrics` endpoint for Grafana integration
 - **Test Mode (Dry-Run)**: Safe deployment/tuning without blocking users
